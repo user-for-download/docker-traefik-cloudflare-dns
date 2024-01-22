@@ -1,4 +1,5 @@
 .env
+.gitignore
 acme.json
 configuration.yml
 users_database.yml
