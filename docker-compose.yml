@@ -1,0 +1,35 @@
+version: "3.9"
+
+name: services
+
+networks:
+  t2_proxy:
+    name: t2_proxy
+    external: true
+
+  socket_proxy:
+    name: socket_proxy
+    external: true
+
+########################### SECRETS
+
+secrets:
+  htpasswd:
+    file: $DOCKERDIR/secrets/htpasswd
+  cf_email:
+    file: $DOCKERDIR/secrets/cf_email
+  cf_api_key:
+    file: $DOCKERDIR/secrets/cf_api_key
+  cf_token:
+    file: $DOCKERDIR/secrets/cf_token
+
+include:
+  # CORE
+  - compose/traefik.yml
+  - compose/socket-proxy.yml
+  - compose/portainer.yml
+  - compose/uptime-kuma.yml
+
+volumes:
+  portainer_data: {}
+  kuma-data: {}

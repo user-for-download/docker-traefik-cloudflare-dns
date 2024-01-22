@@ -1,0 +1,26 @@
+version: "3.9"
+
+networks:
+  t2_proxy:
+    name: t2_proxy
+    external: true
+
+services:
+  # whoami
+  whoami:
+    image: containous/whoami
+    container_name: whoami
+    networks: [ t2_proxy ]
+    security_opt: [ no-new-privileges:true ]
+    restart: unless-stopped
+    command:
+      - --port=8082
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whoami-rtr.entrypoints: https
+      traefik.http.routers.whoami-rtr.rule: Host(`$WHOAMI_DOMAINNAME`)
+      traefik.http.routers.whoami-rtr.service: whoami-svc
+      traefik.http.services.whoami-svc.loadbalancer.server.port: 8082
+      #traefik.http.routers.whoami-rtr.middlewares: middlewares-authelia@file
+      traefik.http.routers.whoami-rtr.tls: true
+  

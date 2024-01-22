@@ -1,0 +1,37 @@
+http:
+  serversTransports:
+    skipverify:
+      insecureSkipVerify: true
+  routers:
+    app-rtr:
+      rule: Host(`<SITE>`)
+      service: app-svc
+      middlewares:
+        - middlewares-rate-limit@file
+      entryPoints:
+        - https
+      tls:
+        certResolver: dns-cloudflare
+  services:
+    app-svc:
+      loadBalancer:
+        serversTransport: skipverify
+        servers:
+          - url: "http://xxx.xxx.xxx.xxx"
+tcp:
+  routers:
+    app-svc-tcp-rtr:
+      rule: HostSNI(`<SITE>`)
+      entryPoints:
+        - https
+      service: app-svc-tcp
+      middlewares:
+        - middlewares-tcp-local-ip@file
+      tls:
+        passthrough: true
+        certResolver: dns-cloudflare
+  services:
+    app-svc-tcp:
+      loadBalancer:
+        servers:
+          - address: "xxx.xxx.xxx.xxx:xxxx"
