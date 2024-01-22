@@ -38,10 +38,6 @@ entryPoints:
       tls:
         certResolver: dns-cloudflare
         options: tls-opts@file
-        domains:
-          - main: example.com
-            sans:
-              - "*.example.com"
   metrics:
     address: :8081
   ping:
