@@ -2,18 +2,14 @@ services:
   # Traefik 2 - Reverse Proxy
   traefik:
     container_name: traefik
-    image: traefik:2.10
+    image: traefik
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
     profiles: ["core", "all"]
     networks:
-      t2_proxy:
+      net_t2:
         ipv4_address: 172.16.90.254
       socket_proxy:
-    healthcheck:
-      test: ["CMD", "traefik", "healthcheck", "--ping"]
-      interval: 5s
-      retries: 3
     ports:
       - target: 80
         published: 80
@@ -31,13 +27,10 @@ services:
     environment:
       - TZ=$TZ
       - CF_API_EMAIL_FILE=/run/secrets/cf_email
-      - CF_API_KEY_FILE=/run/secrets/cf_api_key
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
       - HTPASSWD_FILE=/run/secrets/htpasswd
       - DOMAINNAME_CLOUD_SERVER
-    secrets:
-      - cf_email
-      - cf_api_key
-      - htpasswd
+    secrets: [cf_email, cf_dns_api_token, htpasswd]
     depends_on: [socket-proxy]
     labels:
       traefik.enable: true
@@ -49,7 +42,3 @@ services:
       #traefik.http.routers.traefik-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.traefik-rtr.tls: true
       traefik.http.routers.traefik-rtr.service: api@internal
-      ## Healthcheck/ping
-      traefik.http.routers.ping.rule: Host(`$TRAEFIK_DOMAINNAME`) && Path(`/ping`)"
-      traefik.http.routers.ping.tls: true
-      traefik.http.routers.ping.service: ping@internal

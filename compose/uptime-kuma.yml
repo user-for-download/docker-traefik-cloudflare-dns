@@ -5,8 +5,8 @@ services:
     image: louislam/uptime-kuma
     security_opt: [no-new-privileges:true]
     restart: always
-    networks: [t2_proxy, socket_proxy]
-    profiles: ["core", "all"]
+    networks: [net_t2, socket_proxy]
+    profiles: ["monitoring", "all"]
     volumes:
       - kuma-data:/app/data
     labels:

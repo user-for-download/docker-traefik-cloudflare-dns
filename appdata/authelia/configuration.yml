@@ -1,0 +1,101 @@
+---
+###############################################################################
+#                           Authelia Configuration                            #
+###############################################################################
+theme: dark
+#jwt_secret: "YOUR_JWT_SECRET" in  secrets AUTHELIA_JWT_SECRET
+default_redirection_url: https://auth.<SITE.COM>
+
+server:
+  host: 0.0.0.0
+  port: 9091
+  enable_pprof: false
+  enable_expvars: false
+  disable_healthcheck: false
+  buffers:
+    read: 4096
+    write: 4096
+  timeouts:
+    read: 6s
+    write: 6s
+    idle: 30s
+
+log:
+  level: warn
+  format: text
+  file_path: /logs/authelia.%d.log
+  keep_stdout: false
+
+totp:
+  issuer: auth.<SITE.COM>
+  period: 30
+  skew: 1
+
+authentication_backend:
+  password_reset:
+    disable: true
+  refresh_interval: 5m
+  file:
+    path: /config/users_database.yml
+    password:
+      algorithm: argon2id
+      iterations: 1
+      key_length: 32
+      salt_length: 16
+      memory: 1024
+      parallelism: 8
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: auth.<SITE.COM>
+      policy: bypass
+    - domain: "*.<SITE.COM>"
+      policy: one_factor
+
+session:
+  name: authelia_session
+  domain: <SITE.COM>
+  #secret: "YOUR_SESSION_SECRET" in secrets AUTHELIA_SESSION_SECRET
+  expiration: 1h
+  inactivity: 5m
+  redis:
+    host: redis
+    port: 6379
+    #password: "YOUR_REDIS_PASSWORD" in AUTHELIA_SESSION_REDIS_PASSWORD_FILE
+    database_index: 0
+    maximum_active_connections: 10
+    minimum_idle_connections: 0
+
+regulation:
+  max_retries: 3
+  find_time: 10m
+  ban_time: 12h
+
+storage:
+  #encryption_key: "YOUR_STORAGE_ENCRYPTION_KEY" in AUTHELIA_STORAGE_ENCRYPTION_KEY
+  mysql:
+    host: mariadb
+    port: 3306
+    database: authelia
+    username: authelia
+    #password: "YOUR_MYSQL_AUTHELIA_DB_PASSWORD" in AUTHELIA_MYSQL_PASSWORD
+
+notifier:
+  disable_startup_check: true
+  filesystem:
+    filename: /data/notification.txt
+  #smtp:
+  #  username: YOUR@EMAIL.HERE
+  #  password: "YOUR_EMAIL_PASSWORD"
+  #  host: YOUR_SMTP_HOST
+  #  port: 587
+  #  sender: YOUR@EMAIL.HERE
+  #  identifier: localhost
+  #  subject: "[Authelia] {title}"
+  #  startup_check_address: test@authelia.com
+  #  disable_require_tls: false
+  #  disable_html_emails: false
+  #  tls:
+  #    skip_verify: false
+  #    minimum_version: TLS1.2

@@ -1,0 +1,12 @@
+###############################################################
+#                         Users Database                      #
+###############################################################
+# List of users
+users:
+  addmin:
+    displayname: adddmin
+    password: "$argon2id$v=19$m=65536,t=3,p=4$SDL9p/NJBuXMgBjJloUxUw$G8iVgeczlVSNRPfjoTyNyk2nEvBT+Zs5E1WVVZW/R/A"
+    #password: "d59e64cc9e8d4b711a3b4edaaba650e6"
+    email: addmin@site.com
+    groups:
+      - dev

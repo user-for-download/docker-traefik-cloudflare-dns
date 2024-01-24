@@ -40,12 +40,6 @@ entryPoints:
         options: tls-opts@file
   metrics:
     address: :8081
-  ping:
-    address: :8082
-#  traefik:
-#    address: :8083
-ping:
-  entryPoint: "ping"
 api:
   dashboard: true
 log:
@@ -66,9 +60,10 @@ accessLog:
 certificatesResolvers:
   dns-cloudflare:
     acme:
-      caServer: https://acme-v02.api.letsencrypt.org/directory
+      #caServer: https://acme-v02.api.letsencrypt.org/directory
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
       certificatesDuration: 72
-      email: example@example.com
+      email: 954721@mail.ru
       storage: /acme.json
       dnsChallenge:
         delayBeforeCheck: "30"
@@ -89,22 +84,22 @@ metrics:
       - 1.2
       - 5
     entryPoint: metrics
-  influxDB2:
-    addEntryPointsLabels: true
-    addServicesLabels: true
-    address: ""
-    bucket: ""
-    org: "example"
-    pushInterval: 30s
-    token: ""
-    additionalLabels:
-      environment: production
-      host: example.com
+#  influxDB2:
+#    addEntryPointsLabels: true
+#    addServicesLabels: true
+#    address: "https://inf.<SITE.COM/"
+#    bucket: "traefik-hs"
+#    org: "binetc"
+#    pushInterval: 30s
+#    token: "52iqbYr9g9LK1i9qVnrw1" generation to "https://inf.<SITE.COM/"
+#    additionalLabels:
+#      environment: production
+#      host: binetc.site
 providers:
   docker:
     endpoint: tcp://socket-proxy:2375
     exposedByDefault: false
-    network: t2_proxy
+    network: net_t2
     swarmMode: false
   file:
     directory: /etc/traefik/rules

@@ -1,0 +1,34 @@
+services:
+  # authelia
+  authelia:
+    container_name: authelia
+    image: authelia/authelia:latest
+    volumes:
+      - $APPDIR/authelia:/config
+      - authelia_data:/data
+      - $DOCKERDIR/logs/authelia:/logs
+    secrets:
+      [
+        authelia_jwt_secret,
+        authelia_session_secret,
+        authelia_storage_mysql_password,
+        authelia_storage_encryption_key,
+      ]
+    environment:
+      TZ: $TZ
+      AUTHELIA_JWT_SECRET_FILE: /run/secrets/authelia_jwt_secret
+      AUTHELIA_SESSION_SECRET_FILE: /run/secrets/authelia_session_secret
+      AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE: /run/secrets/authelia_storage_mysql_password
+      AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/authelia_storage_encryption_key
+    networks: [net_t2, net_redis, net_db]
+    security_opt: [no-new-privileges:true]
+    profiles: ["auth", "all"]
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.authelia-rtr.entrypoints: https
+      traefik.http.routers.authelia-rtr.rule: Host(`$AUTH_DOMAINNAME`)
+      traefik.http.routers.authelia-rtr.service: authelia-svc
+      traefik.http.routers.authelia-rtr.middlewares: middlewares-authelia@file
+      traefik.http.services.authelia-svc.loadbalancer.server.port: 9091
+      traefik.http.routers.authelia-rtr.tls: true

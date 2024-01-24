@@ -3,7 +3,8 @@ http:
     middlewares-basic-auth:
       basicAuth:
         # users:
-        #   - "user:$apsdfswWvC/6.$E3FtsfTntPC0wVJ7IUVtX1"
+        #   - "admin:$apr1$t2wvh04n$J/LHZ3lxT6Rztl./Fc3Z11"
+        # pwd: RMQ8KBrhwnQMuLWB
         usersFile: "/run/secrets/htpasswd"
         realm: "Traefik 2 Basic Auth"
 

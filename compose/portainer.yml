@@ -7,7 +7,7 @@ services:
     security_opt: [no-new-privileges:true]
     profiles: ["core", "all"]
     restart: unless-stopped
-    networks: [t2_proxy, socket_proxy]
+    networks: [net_t2, socket_proxy]
     volumes:
       - portainer_data:/data
     environment:
