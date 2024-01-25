@@ -1,0 +1,24 @@
+services:
+  #dashboards crowdsec
+  #The default username is crowdsec@crowdsec.net and the default password is !!Cr0wdS3c_M3t4b4s3??
+  crowdsec-dashboard:
+    container_name: crowdsec-dashboard
+    build: $APPDIR/crowdsec-dashboard
+    environment:
+      TZ: $TZ
+      MB_DB_FILE: /data/metabase.db
+      MGID: "${GID-1000}"
+    volumes:
+      - crowdsec_data:/metabase-data/
+    networks: [net_t2]
+    profiles: ["crowdsec", "all"]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.crdb-rtr.entrypoints: https
+      traefik.http.routers.crdb-rtr.rule: Host(`$CRDB_DOMAINNAME`)
+      traefik.http.routers.crdb-rtr.service: crdb-svc
+      traefik.http.services.crdb-svc.loadbalancer.server.port: 3000
+      #traefik.http.routers.crdb-rtr.middlewares: middlewares-authelia@file
+      traefik.http.routers.crdb-rtr.tls: true

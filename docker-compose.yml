@@ -54,16 +54,21 @@ include:
   # db
   - compose/mariadb.yml
   - compose/redis.yml
-#  - compose/influxdb.yml
+  #- compose/influxdb.yml
   # monitoring
-  - compose/uptime-kuma.yml
+  #- compose/uptime-kuma.yml
+  - compose/glances.yml
   # auth
   - compose/authelia.yml
   # src
   - compose/phpmyadmin.yml
   # apps
-#  - compose/it-tools.yml
-  - compose/owncloud.yml
+  #- compose/it-tools.yml
+  #- compose/owncloud.yml
+  # crowdsec
+  - compose/crowdsec.yml
+  #- compose/crowdsec-db.yml
+  #- compose/crowdsec-bn.yml
 volumes:
   #
   portainer_data: {}
@@ -72,8 +77,10 @@ volumes:
   influxdb_data: {}
   #
   authelia_data: {}
-  # 
+  #
   redis_data: {}
   mariadb_data: {}
-  # 
+  #
   owncloud_files: {}
+  #
+  crowdsec_data: {}

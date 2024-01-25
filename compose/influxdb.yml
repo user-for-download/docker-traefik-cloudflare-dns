@@ -6,7 +6,9 @@ services:
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
     profiles: ["db", "all"]
-    networks: [net_t2]
+    networks: [net_t2, net_db]
+    expose:
+      - 8086
     volumes:
       - $DOCKERDIR/appdata/influxdb2/config:/etc/influxdb2
       - influxdb_data:/var/lib/influxdb2

@@ -1,0 +1,26 @@
+services:
+  # Glances - System Information
+  glances:
+    image: nicolargo/glances:latest-full
+    container_name: glances
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    profiles: ["monitoring", "all"]
+    privileged: true
+    networks: [net_t2, socket_proxy, net_db]
+    pid: host
+    volumes:
+      - $DOCKERDIR/appdata/glances/glances.conf:/etc/glances.conf
+      #- $DOCKERDIR:/data/docker:ro
+    environment:
+      #GLANCES_OPT: "-C /etc/glances.conf --quiet --export influxdb2"
+      GLANCES_OPT: "-w"
+      DOCKER_HOST: tcp://socket-proxy:2375
+    labels:
+      traefik.enable: true
+      traefik.http.routers.glns-rtr.entrypoints: https
+      traefik.http.routers.glns-rtr.rule: Host(`$GL_DOMAINNAME`)
+      traefik.http.routers.glns-rtr.service: glns-svc
+      traefik.http.services.glns-svc.loadbalancer.server.port: 61208
+      #traefik.http.routers.glns-rtr.middlewares: middlewares-authelia@file
+      traefik.http.routers.glns-rtr.tls: true
