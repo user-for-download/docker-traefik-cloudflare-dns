@@ -1,0 +1,12 @@
+services:
+  traefik-certs-dumper:
+    container_name: traefik-certs-dumper
+    image: ldez/traefik-certs-dumper
+    networks: [net_t2]
+    profiles: ["adguard", "all"]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    entrypoint: sh -c ' apk add jq ; while ! [ -e acme.json ] || ! [ `jq ".[] | .Certificates | length" acme.json` != 0 ]; do sleep 1 ; done && traefik-certs-dumper file --version v2 --watch --source acme.json --dest /data/certs'
+    volumes:
+      - $APPDIR/traefik/acme/acme.json:/acme.json:ro
+      - adquard:/data

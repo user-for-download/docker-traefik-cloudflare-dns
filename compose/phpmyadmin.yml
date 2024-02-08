@@ -22,3 +22,5 @@ services:
       traefik.http.services.phpmy-svc.loadbalancer.server.port: 80
       #traefik.http.routers.phpmy-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.phpmy-rtr.tls: true
+      traefik.http.routers.phpmy-rtr.tls.options: tls-opts@file
+      

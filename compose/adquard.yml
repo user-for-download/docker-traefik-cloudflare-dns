@@ -1,0 +1,26 @@
+services:
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
+    restart: unless-stopped
+    networks: [net_t2]
+    security_opt: [no-new-privileges:true]
+    profiles: ["adguard", "all"]
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $APPDIR/adguardhome/conf:/opt/adguardhome/conf
+      - $APPDIR/adguardhome/work:/opt/adguardhome/work
+      - adquard:/opt/adguardhome/vol
+    expose:
+      - 80
+      - 443
+    labels:
+      traefik.enable: true
+      traefik.tcp.routers.adg-rtr.rule: HostSNI(`$DNS_DOMAINNAME`)
+      traefik.tcp.routers.adg-rtr.service: adg-svc
+      traefik.tcp.routers.adg-rtr.tls.passthrough: true
+      traefik.tcp.services.adg-svc.loadbalancer.server.port: 443
+      traefik.http.routers.adg-rtr.tls.options: tls-opts@file

@@ -14,10 +14,10 @@ services:
       OWNCLOUD_DB_TYPE: mysql
       OWNCLOUD_DB_NAME: owncloud
       OWNCLOUD_DB_USERNAME: owncloud
-      OWNCLOUD_DB_PASSWORD: 59118055286004b1e20ac5e9b9668bb4aa
+      OWNCLOUD_DB_PASSWORD: 591180s3a55286004b1e20ac5e9b9668bb4aa
       OWNCLOUD_DB_HOST: mariadb
       OWNCLOUD_ADMIN_USERNAME: addmin
-      OWNCLOUD_ADMIN_PASSWORD: db641c9e5d2ddd497a5684e8750ffcc7ef7
+      OWNCLOUD_ADMIN_PASSWORD: db641c9egsd5d2ddd497a5684e8750ffcc7ef7
       OWNCLOUD_MYSQL_UTF8MB4: true
       OWNCLOUD_REDIS_ENABLED: true
       OWNCLOUD_REDIS_HOST: redis
@@ -35,3 +35,4 @@ services:
       traefik.http.routers.owncloud-rtr.service: owncloud-svc
       traefik.http.services.owncloud-svc.loadbalancer.server.port: 8080
       traefik.http.routers.owncloud-rtr.tls: true
+      traefik.http.routers.owncloud-rtr.tls.options: tls-opts@file

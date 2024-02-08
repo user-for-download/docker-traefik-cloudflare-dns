@@ -1,6 +1,6 @@
 version: "3.9"
 
-name: docker-traefik-cloudflare-dns
+name: tr-dns
 
 networks:
   net_t2:
@@ -44,8 +44,8 @@ secrets:
   mysql_root_password:
     file: $DOCKERDIR/secrets/db/mysql_root_password
   #redis
-  redis_password:
-    file: $DOCKERDIR/secrets/db/redis_password
+  vaultwarden_admin_token:
+    file: $DOCKERDIR/secrets/vl/vaultwarden_admin_token
 include:
   # core
   - compose/traefik.yml
@@ -54,10 +54,10 @@ include:
   # db
   - compose/mariadb.yml
   - compose/redis.yml
-  #- compose/influxdb.yml
+  - compose/influxdb.yml
   # monitoring
-  #- compose/uptime-kuma.yml
-  - compose/glances.yml
+  - compose/uptime-kuma.yml
+  #- compose/glances.yml
   # auth
   - compose/authelia.yml
   # src
@@ -65,10 +65,15 @@ include:
   # apps
   #- compose/it-tools.yml
   #- compose/owncloud.yml
+  - compose/vaultwarden.yml
+  - compose/dozzle.yml
   # crowdsec
   - compose/crowdsec.yml
   #- compose/crowdsec-db.yml
   #- compose/crowdsec-bn.yml
+  # adguard
+  - compose/traefik-certs-dumper.yml
+  - compose/adquard.yml
 volumes:
   #
   portainer_data: {}
@@ -84,3 +89,8 @@ volumes:
   owncloud_files: {}
   #
   crowdsec_data: {}
+  #
+  vaultwarden: {}
+  #
+  adquard: {}
+

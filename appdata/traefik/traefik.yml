@@ -74,27 +74,27 @@ certificatesResolvers:
       #httpChallenge:
       #  entryPoint: "http"
 metrics:
-  prometheus:
+  #  prometheus:
+  #    addEntryPointsLabels: true
+  #    addRoutersLabels: true
+  #    addServicesLabels: true
+  #    buckets:
+  #      - 0.1
+  #      - 0.3
+  #      - 1.2
+  #      - 5
+  #    entryPoint: metrics
+  influxDB2:
     addEntryPointsLabels: true
-    addRoutersLabels: true
     addServicesLabels: true
-    buckets:
-      - 0.1
-      - 0.3
-      - 1.2
-      - 5
-    entryPoint: metrics
-#  influxDB2:
-#    addEntryPointsLabels: true
-#    addServicesLabels: true
-#    address: "https://inf.<SITE.COM/"
-#    bucket: "traefik-hs"
-#    org: "binetc"
-#    pushInterval: 30s
-#    token: "52iqbYr9g9LK1i9qVnrw1" generation to "https://inf.<SITE.COM/"
-#    additionalLabels:
-#      environment: production
-#      host: binetc.site
+    address: "http://influxdb:8086"
+    bucket: "traefik-hs"
+    org: "binetc"
+    pushInterval: 30s
+    token: "PsLM5D1pigvdLpD56hW_Fn6Oh59bCwzXwUZyY7ZZMI2eeNG1ETAW7AfBbVqeUNHBA=="
+    additionalLabels:
+      environment: production
+      host: <SITE.COM>
 providers:
   docker:
     endpoint: tcp://socket-proxy:2375
@@ -103,7 +103,6 @@ providers:
     swarmMode: false
   file:
     directory: /etc/traefik/rules
-    filename: /etc/traefik/traefik.toml
     watch: true
 serversTransport:
   insecureSkipVerify: true

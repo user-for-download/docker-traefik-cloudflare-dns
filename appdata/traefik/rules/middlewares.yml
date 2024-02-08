@@ -25,6 +25,8 @@ http:
           - OPTIONS
           - PUT
         accessControlMaxAge: 100
+        browserXssFilter: true
+        customBrowserXSSValue: "0"
         hostsProxyHeaders:
           - "X-Forwarded-Host"
         stsSeconds: 63072000
@@ -33,7 +35,6 @@ http:
         forceSTSHeader: true
         customFrameOptionsValue: SAMEORIGIN # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
         contentTypeNosniff: true
-        browserXssFilter: true
         referrerPolicy: "same-origin"
         permissionsPolicy: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), vr=()"
         customResponseHeaders:
@@ -42,7 +43,7 @@ http:
 
     middlewares-authelia:
       forwardAuth:
-        address: "http://authelia:9091/api/verify?rd=https://authelia.{{env "DOMAINNAME_CLOUD_SERVER"}}"
+        address: "http://authelia:9091/api/verify?rd=https://auth.{{env "DOMAINNAME_CLOUD_SERVER"}}"
         trustForwardHeader: true
         authResponseHeaders:
           - "Remote-User"

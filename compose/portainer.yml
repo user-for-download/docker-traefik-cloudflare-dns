@@ -20,3 +20,4 @@ services:
       traefik.http.services.portainer-svc.loadbalancer.server.port: 9000
       #traefik.http.routers.portainer-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.portainer-rtr.tls: true
+      traefik.http.routers.portainer-rtr.tls.options: tls-opts@file

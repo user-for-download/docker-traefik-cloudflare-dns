@@ -5,10 +5,11 @@ services:
     container_name: crowdsec
     expose:
       - 6060
+      - 8080
     environment:
       TZ: $TZ
       COLLECTIONS: "crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/iptables crowdsecurity/linux LePresidente/authelia"
-      PARSERS: "crowdsecurity/dateparse-enrich crowdsecurity/traefik-logs crowdsecurity/nginx-proxy-manager-logs crowdsecurity/sshd-logs crowdsecurity/syslog-logs crowdsecurity/geoip-enrich LePresidente/authelia-logs"
+      PARSERS: "crowdsecurity/dateparse-enrich crowdsecurity/traefik-logs crowdsecurity/sshd-logs crowdsecurity/syslog-logs crowdsecurity/geoip-enrich LePresidente/authelia-logs"
       GID: "${GID-1000}"
       CUSTOM_HOSTNAME: docker-crowdsec
     volumes:
@@ -22,10 +23,10 @@ services:
     profiles: ["crowdsec", "all"]
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.crowdsec-rtr.entrypoints: https
-      traefik.http.routers.crowdsec-rtr.rule: Host(`$CROWDSEC_DOMAINNAME`)
-      traefik.http.routers.crowdsec-rtr.service: crowdsec-svc
-      traefik.http.services.crowdsec-svc.loadbalancer.server.port: 8080
-      traefik.http.routers.crowdsec-rtr.tls: true
+#    labels:
+#      traefik.enable: true
+#      traefik.http.routers.crowdsec-rtr.entrypoints: https
+#      traefik.http.routers.crowdsec-rtr.rule: Host(`$CROWDSEC_DOMAINNAME`)
+#      traefik.http.routers.crowdsec-rtr.service: crowdsec-svc
+#      traefik.http.services.crowdsec-svc.loadbalancer.server.port: 8080
+#      traefik.http.routers.crowdsec-rtr.tls: true

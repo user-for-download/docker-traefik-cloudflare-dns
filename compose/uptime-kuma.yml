@@ -17,3 +17,4 @@ services:
       traefik.http.services.kuma-svc.loadbalancer.server.port: 3001
       #traefik.http.routers.kuma-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.kuma-rtr.tls: true
+      traefik.http.routers.kuma-rtr.tls.options: tls-opts@file
