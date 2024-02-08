@@ -1,5 +1,5 @@
 # docker-traefik-cloudflare-dns
-> 20.04.5 LTS (Focal Fossa); default user ubuntu (1000,1000)
+> Ubuntu 22.04.3 LTS (Focal Fossa); default user ubuntu (1000,1000)
 
 The latest versions of dockers were used on the publication mark. Now they may not be compatible! Be careful.
 
