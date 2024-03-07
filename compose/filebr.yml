@@ -1,0 +1,23 @@
+services:
+  # filebrowser
+  filebrowser:
+    image: filebrowser/filebrowser
+    container_name: filebrowser
+    networks: [net_t2]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    profiles: ["apps", "all"]
+    volumes:
+      - /:/srv
+      - filebrowser_data:/database/filebrowser.db
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+    labels:
+      traefik.enable: true
+      traefik.http.routers.filebr-rtr.entrypoints: https
+      traefik.http.routers.filebr-rtr.rule: Host(`$FILE_DOMAINNAME`)
+      traefik.http.routers.filebr-rtr.service: filebr-svc
+      traefik.http.services.filebr-svc.loadbalancer.server.port: 80
+      traefik.http.routers.filebr-rtr.middlewares: middlewares-authelia@file
+      traefik.http.routers.filebr-rtr.tls: true

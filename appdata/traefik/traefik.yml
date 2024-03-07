@@ -37,9 +37,8 @@ entryPoints:
         - chain-no-auth@file
       tls:
         certResolver: dns-cloudflare
-        options: tls-opts@file
-  metrics:
-    address: :8081
+  # metrics:
+  #   address: :8081
 api:
   dashboard: true
 log:
@@ -57,6 +56,9 @@ accessLog:
       - 204-299
       - 400-499
       - 500-599
+  fields:
+    names:
+      StartUTC: drop
 certificatesResolvers:
   dns-cloudflare:
     acme:
@@ -73,7 +75,7 @@ certificatesResolvers:
           - 1.0.0.1:53
       #httpChallenge:
       #  entryPoint: "http"
-metrics:
+# metrics:
   #  prometheus:
   #    addEntryPointsLabels: true
   #    addRoutersLabels: true
@@ -84,17 +86,17 @@ metrics:
   #      - 1.2
   #      - 5
   #    entryPoint: metrics
-  influxDB2:
-    addEntryPointsLabels: true
-    addServicesLabels: true
-    address: "http://influxdb:8086"
-    bucket: "traefik-hs"
-    org: "binetc"
-    pushInterval: 30s
-    token: "PsLM5D1pigvdLpD56hW_Fn6Oh59bCwzXwUZyY7ZZMI2eeNG1ETAW7AfBbVqeUNHBA=="
-    additionalLabels:
-      environment: production
-      host: <SITE.COM>
+  # influxDB2:
+  #   addEntryPointsLabels: true
+  #   addServicesLabels: true
+  #   address: "http://influxdb:8086"
+  #   bucket: "traefik-hs"
+  #   org: "<SITE.COM>"
+  #   pushInterval: 30s
+  #   token: "PsLM5D1pigvdLpD56hW_Fn6Oh59bCwzXwUZyY7ZZMI2eeNG1ETAW7AfBbVqeUNHBA=="
+  #   additionalLabels:
+  #     environment: production
+  #     host: <SITE.COM>
 providers:
   docker:
     endpoint: tcp://socket-proxy:2375

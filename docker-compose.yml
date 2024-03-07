@@ -61,19 +61,21 @@ include:
   # auth
   - compose/authelia.yml
   # src
-  - compose/phpmyadmin.yml
+  # - compose/phpmyadmin.yml
   # apps
   #- compose/it-tools.yml
   #- compose/owncloud.yml
-  - compose/vaultwarden.yml
-  - compose/dozzle.yml
+  #- compose/vaultwarden.yml
+  #- compose/dozzle.yml
+  #- compose/filebr.yml
+  #- compose/syncthing.yml
   # crowdsec
   - compose/crowdsec.yml
   #- compose/crowdsec-db.yml
   #- compose/crowdsec-bn.yml
   # adguard
-  - compose/traefik-certs-dumper.yml
-  - compose/adquard.yml
+  #- compose/traefik-certs-dumper.yml
+  #- compose/adquard.yml
 volumes:
   #
   portainer_data: {}
@@ -93,4 +95,6 @@ volumes:
   vaultwarden: {}
   #
   adquard: {}
+  #
+  filebrowser_data: {}
 

@@ -7,11 +7,11 @@ labels:
   type: syslog
 ---
 filenames:
-  - /logs/traefik/access.log
+  - /logs/traefik/access*
 labels:
   type: traefik
 ---
 filenames:
-  - /logs/authelia/authelia.*.log
+  - /logs/authelia/authelia*
 labels:
   type: authelia

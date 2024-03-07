@@ -35,3 +35,26 @@ docker network create -d bridge net_t2 --subnet 172.16.90.0/24
 docker network create -d bridge net_db --subnet 172.16.82.0/23
 docker network create -d bridge net_redis --subnet 172.16.84.0/23
 ```
+
+## Create logrotate
+```bash
+nano /etc/logrotate.d/traefik  
+```
+```bash
+compress
+/home/<USERS>/git/docker-traefik-cloudflare-dns/logs/traefik/*.log {
+  daily
+  rotate 30
+  missingok
+  notifempty
+  compress
+  dateext
+  dateformat .%Y-%m-%d
+  create 0644 root root
+  postrotate
+  docker kill --signal="USR1" $(docker ps | grep traefik | awk '{print $1}')
+  endscript
+}
+
+logrotate /etc/logrotate.conf --debug 
+```
