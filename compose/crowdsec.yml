@@ -20,6 +20,10 @@ services:
       - $APPDIR/crowdsec:/etc/crowdsec
       - crowdsec_data:/var/lib/crowdsec/data
     networks: [net_t2]
+    # if use local
+    # networks:
+    #   net_t2:
+    #     ipv4_address: 172.16.90.253
     profiles: ["crowdsec", "all"]
     security_opt: [no-new-privileges:true]
     restart: unless-stopped

@@ -14,11 +14,9 @@ services:
       - $APPDIR/adguardhome/conf:/opt/adguardhome/conf
       - $APPDIR/adguardhome/work:/opt/adguardhome/work
       - adquard:/opt/adguardhome/vol
-    expose:
-      - 80
-      - 443
     labels:
       traefik.enable: true
+      traefik.tcp.routers.adg-rtr.entrypoints: https
       traefik.tcp.routers.adg-rtr.rule: HostSNI(`$DNS_DOMAINNAME`)
       traefik.tcp.routers.adg-rtr.service: adg-svc
       traefik.tcp.routers.adg-rtr.tls.passthrough: true
