@@ -1,5 +1,3 @@
-version: "3.9"
-
 name: tr-dns
 
 networks:
@@ -61,21 +59,20 @@ include:
   # auth
   - compose/authelia.yml
   # src
-  # - compose/phpmyadmin.yml
+  - compose/phpmyadmin.yml
   # apps
   #- compose/it-tools.yml
   #- compose/owncloud.yml
-  #- compose/vaultwarden.yml
-  #- compose/dozzle.yml
+  - compose/vaultwarden.yml
+  - compose/dozzle.yml
   #- compose/filebr.yml
-  #- compose/syncthing.yml
+  - compose/whats-up-docker.yml
   # crowdsec
   - compose/crowdsec.yml
   #- compose/crowdsec-db.yml
-  #- compose/crowdsec-bn.yml
   # adguard
-  #- compose/traefik-certs-dumper.yml
-  #- compose/adquard.yml
+  - compose/traefik-certs-dumper.yml
+  - compose/adquard.yml
 volumes:
   #
   portainer_data: {}
@@ -97,4 +94,5 @@ volumes:
   adquard: {}
   #
   filebrowser_data: {}
-
+  #
+  whats-up-docker: {}

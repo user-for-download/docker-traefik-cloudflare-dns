@@ -40,6 +40,19 @@ http:
         customResponseHeaders:
           X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex," # disable search engines from indexing home server
           server: "" # hide server info from visitors
+    
+    middlewares-nextcloud-redirect:
+      redirectRegex:
+        permanent: true
+        regex: 'https://(.*)/.well-known/(card|cal)dav'
+        replacement: 'https://${1}/remote.php/dav/'
+
+    middlewares-nextcloud-headers:
+      headers:
+        stsincludesubdomains: false
+        stspreload: true
+        stsseconds: 31536000
+        isdevelopment: false
 
     middlewares-authelia:
       forwardAuth:

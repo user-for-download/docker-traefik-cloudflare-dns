@@ -20,3 +20,4 @@ services:
       traefik.http.services.influxdb-svc.loadbalancer.server.port: 8086
       #traefik.http.routers.influxdb-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.influxdb-rtr.tls: true
+      traefik.http.routers.influxdb-rtr.tls.options: tls-opts@file

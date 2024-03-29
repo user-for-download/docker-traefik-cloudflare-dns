@@ -1,0 +1,24 @@
+type: http
+name: http_default
+
+log_level: debug
+
+format: |
+  {
+   "chat_id": <CHAT_ID>,
+   "text": "
+     {{range . -}}
+     {{$alert := . -}}
+     {{range .Decisions -}}
+     {{.Value}} will get {{.Type}} for next {{.Duration}} for  triggering {{.Scenario}}.\rn https://www.shodan.io/host/{{.Value}}
+     {{end -}}
+     {{end -}}
+   "
+  }
+
+url: https://api.telegram.org/bot<TELEGRAM-BOT-TOKEN>/sendMessage
+
+method: POST
+
+headers:
+  Content-Type: "application/json"

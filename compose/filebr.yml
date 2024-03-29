@@ -21,3 +21,4 @@ services:
       traefik.http.services.filebr-svc.loadbalancer.server.port: 80
       traefik.http.routers.filebr-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.filebr-rtr.tls: true
+      traefik.http.routers.filebr-rtr.tls.options: tls-opts@file

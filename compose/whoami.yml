@@ -17,3 +17,4 @@ services:
       traefik.http.services.whoami-svc.loadbalancer.server.port: 8082
       #traefik.http.routers.whoami-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.whoami-rtr.tls: true
+      traefik.http.routers.whoami-rtr.tls.options: tls-opts@file

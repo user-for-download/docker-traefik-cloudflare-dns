@@ -26,3 +26,4 @@ services:
       traefik.http.services.sync-svc.loadbalancer.server.port: 8384
       #traefik.http.routers.sync-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.sync-rtr.tls: true
+      traefik.http.routers.sync-rtr.tls.options: tls-opts@file

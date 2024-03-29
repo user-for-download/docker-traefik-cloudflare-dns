@@ -21,4 +21,3 @@ services:
       traefik.tcp.routers.adg-rtr.service: adg-svc
       traefik.tcp.routers.adg-rtr.tls.passthrough: true
       traefik.tcp.services.adg-svc.loadbalancer.server.port: 443
-      traefik.http.routers.adg-rtr.tls.options: tls-opts@file

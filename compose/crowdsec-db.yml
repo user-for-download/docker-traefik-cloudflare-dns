@@ -22,3 +22,4 @@ services:
       traefik.http.services.crdb-svc.loadbalancer.server.port: 3000
       #traefik.http.routers.crdb-rtr.middlewares: middlewares-authelia@file
       traefik.http.routers.crdb-rtr.tls: true
+      traefik.http.routers.crdb-rtr.tls.options: tls-opts@file
