@@ -65,7 +65,7 @@ certificatesResolvers:
       #caServer: https://acme-v02.api.letsencrypt.org/directory
       caServer: https://acme-staging-v02.api.letsencrypt.org/directory
       certificatesDuration: 72
-      email: 954721@mail.ru
+      email: mail@mail.com
       storage: /acme.json
       dnsChallenge:
         delayBeforeCheck: "30"
@@ -102,7 +102,6 @@ providers:
     endpoint: tcp://socket-proxy:2375
     exposedByDefault: false
     network: net_t2
-    swarmMode: false
   file:
     directory: /etc/traefik/rules
     watch: true

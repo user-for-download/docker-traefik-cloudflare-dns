@@ -3,7 +3,6 @@
 #                           Authelia Configuration                            #
 ###############################################################################
 theme: dark
-#jwt_secret: "YOUR_JWT_SECRET" in  secrets AUTHELIA_JWT_SECRET
 
 server:
   address: "tcp://0.0.0.0:9091"
