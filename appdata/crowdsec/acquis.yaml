@@ -12,6 +12,6 @@ labels:
   type: traefik
 ---
 filenames:
-  - /logs/authelia/authelia*
+  - /logs/authelia/authelia.*.log
 labels:
   type: authelia

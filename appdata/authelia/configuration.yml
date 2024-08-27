@@ -3,6 +3,8 @@
 #                           Authelia Configuration                            #
 ###############################################################################
 theme: dark
+#jwt_secret: "YOUR_JWT_SECRET" in  secrets AUTHELIA_JWT_SECRET
+#default_redirection_url: https://auth.<SITE.COM>
 
 server:
   address: "tcp://0.0.0.0:9091"
@@ -17,6 +19,13 @@ server:
     read: 6s
     write: 6s
     idle: 30s
+
+ntp:
+  address: 'udp://time.cloudflare.com:123'
+  version: 3
+  max_desync: '3s'
+  disable_startup_check: false
+  disable_failure: false
 
 log:
   level: warn
@@ -60,17 +69,15 @@ session:
   cookies:
     - domain: "<SITE.COM>"
       authelia_url: "https://auth.<SITE.COM>"
-      default_redirection_url: "https://tr.<SITE.COM>"
+      default_redirection_url: "https://traefik.<SITE.COM>"
       name: "authelia_session"
       same_site: "lax"
       inactivity: "5m"
       expiration: "1h"
       remember_me: "1d"
-  #secret: "YOUR_SESSION_SECRET" in secrets AUTHELIA_SESSION_SECRET
   redis:
     host: redis
     port: 6379
-    #password: "YOUR_REDIS_PASSWORD" in AUTHELIA_SESSION_REDIS_PASSWORD_FILE
     database_index: 0
     maximum_active_connections: 10
     minimum_idle_connections: 0
@@ -91,6 +98,7 @@ notifier:
   disable_startup_check: true
   filesystem:
     filename: /data/notification.txt
+    
   #smtp:
   #  username: YOUR@EMAIL.HERE
   #  password: "YOUR_EMAIL_PASSWORD"

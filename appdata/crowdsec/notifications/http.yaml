@@ -5,8 +5,9 @@ log_level: debug
 
 format: |
   {
-   "chat_id": <CHAT_ID>,
+   "chat_id": <ID>,
    "text": "
+     < - CHANGE NAME - >
      {{range . -}}
      {{$alert := . -}}
      {{range .Decisions -}}
@@ -16,7 +17,7 @@ format: |
    "
   }
 
-url: https://api.telegram.org/bot<TELEGRAM-BOT-TOKEN>/sendMessage
+url: https://api.telegram.org/<token>/sendMessage
 
 method: POST
 

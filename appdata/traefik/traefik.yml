@@ -86,6 +86,8 @@ certificatesResolvers:
   #      - 1.2
   #      - 5
   #    entryPoint: metrics
+
+  # run influxDB2 and uncomment
   # influxDB2:
   #   addEntryPointsLabels: true
   #   addServicesLabels: true
@@ -107,3 +109,9 @@ providers:
     watch: true
 serversTransport:
   insecureSkipVerify: true
+
+experimental:
+  plugins:
+    crowdsec-bouncer-traefik-plugin:
+      moduleName: "github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin"
+      version: "v1.3.3"

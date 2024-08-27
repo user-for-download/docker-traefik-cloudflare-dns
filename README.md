@@ -1,3 +1,4 @@
+formated
 # docker-traefik-cloudflare-dns
 > Linux 5.15.0-97-generic #107-Ubuntu SMP Wed Feb 7 13:26:48 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux; default user ubuntu (1000,1000)
 
@@ -52,11 +53,9 @@ PGID=
 TZ=
 DOCKERDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns
 APPDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns/appdata
-
 ##### DOMAIN
 DOMAINNAME_CLOUD_SERVER=<SITE.COM>
 TRAEFIK_DOMAINNAME=traefik.<SITE.COM>
-------
 ------
 SYNC_DOMAINNAME=sync.<SITE.COM>
 ```
