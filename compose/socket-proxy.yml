@@ -14,6 +14,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
       - LOG_LEVEL=info
+      - DISABLE_IPV6=1
       - EVENTS=1
       - PING=1
       - VERSION=1

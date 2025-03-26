@@ -89,7 +89,6 @@ nano /etc/logrotate.d/traefik
   docker kill --signal="USR1" $(docker ps | grep traefik | awk '{print $1}')
   endscript
 }
-
 ```
 ```bash
 logrotate /etc/logrotate.conf --debug  
@@ -114,3 +113,33 @@ sudo systemctl restart crowdsec-firewall-bouncer.service
 ```bash	
 cat /var/log/crowdsec-firewall-bouncer.log
 ```
+## Crowdsec create whitelists
+```bash	
+nano appdata/crowdsec/parsers/s02-enrich/mywhitelists.yaml
+```
+```bash
+name: "my/whitelistlocal" ## Must be unique
+description: "Whitelist events from my ipv4 addresses"
+#it's a normal parser, so we can restrict its scope with filter
+filter: "1 == 1"
+whitelist:
+  reason: "my ipv4 ranges"
+  ip:
+    - "127.0.0.1"
+  cidr:
+    - "192.168.0.0/16"
+```
+# Add authelia
+## run DB 
+```bash	
+docker-compose --profile db up -d
+```
+```bash	
+docker exec -it <ID-DB> mysql -u root -p -e "
+CREATE USER 'authelia'@'%' IDENTIFIED BY '12345';
+GRANT USAGE ON *.* TO 'authelia'@'%' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+CREATE DATABASE IF NOT EXISTS \`authelia\`;
+GRANT ALL PRIVILEGES ON \`authelia\`.* TO 'authelia'@'%';
+"
+```
+docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password '123456'
