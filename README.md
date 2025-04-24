@@ -55,9 +55,7 @@ DOCKERDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns
 APPDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns/appdata
 ##### DOMAIN
 DOMAINNAME_CLOUD_SERVER=<SITE.COM>
-TRAEFIK_DOMAINNAME=traefik.<SITE.COM>
-------
-SYNC_DOMAINNAME=sync.<SITE.COM>
+DOMAINNAME=<SITE.COM>
 ```
 ## Create new acme.json
 ```bash
@@ -77,17 +75,15 @@ docker network create -d bridge net_redis --subnet 172.16.84.0/23
 nano /etc/logrotate.d/traefik  
 ```
 ```bash
-/home/<USERS>/git/docker-traefik-cloudflare-dns/logs/traefik/*.log {
-  daily
-  rotate 30
-  missingok
-  notifempty
-  dateext
-  dateformat .%Y-%m-%d
-  create 0644 root root
-  postrotate
-  docker kill --signal="USR1" $(docker ps | grep traefik | awk '{print $1}')
-  endscript
+/<PATH-TO-LOGS>/logs/traefik/*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+      docker kill --signal="USR1" $(docker ps | grep traefik | awk '{print $1}') > /dev/null 2>&1 || true
+    endscript
 }
 ```
 ```bash
@@ -142,4 +138,6 @@ CREATE DATABASE IF NOT EXISTS \`authelia\`;
 GRANT ALL PRIVILEGES ON \`authelia\`.* TO 'authelia'@'%';
 "
 ```
+```bash	
 docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password '123456'
+```

@@ -1,45 +1,49 @@
 services:
-  # Traefik 2 - Reverse Proxy
   traefik:
     container_name: traefik
     image: traefik
-    security_opt: [no-new-privileges:true]
-    restart: unless-stopped
-    profiles: ["core", "all"]
+    security_opt:
+      - no-new-privileges:true
+    #user: "1000:1000"
+    restart: always
+    profiles:
+      - core
+      - all
     networks:
-      net_t2:
+      net_t2: 
         ipv4_address: 172.16.90.254
-      socket_proxy:
+      socket_proxy: 
     ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: host
-      - target: 443
-        published: 443
-        protocol: tcp
-        mode: host
+      - "80:80"
+      - "443:443"
     volumes:
-      - $APPDIR/traefik/acme/acme.json:/acme.json
-      - $APPDIR/traefik/traefik.yml:/etc/traefik/traefik.yml
-      - $APPDIR/traefik/rules:/etc/traefik/rules
-      - $DOCKERDIR/logs/traefik:/logs
+      - "${APPDIR}/traefik/acme/acme.json:/acme.json"
+      - "${DOCKERDIR}/logs/traefik:/logs"
+      - "${APPDIR}/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "${APPDIR}/traefik/rules:/etc/traefik/rules:ro"
     environment:
-      - TZ=$TZ
-      - CF_API_EMAIL_FILE=/run/secrets/cf_email
+      - TZ=${TZ}
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
-      - HTPASSWD_FILE=/run/secrets/htpasswd
-      - DOMAINNAME_CLOUD_SERVER
-    secrets: [cf_email, cf_dns_api_token, htpasswd]
-    depends_on: [socket-proxy]
+      - DOMAINNAME_CLOUD_SERVER=${DOMAINNAME_CLOUD_SERVER}
+    secrets:
+      - cf_dns_api_token
+      - htpasswd
+      - crowdsec_api_key 
+    depends_on:
+      - socket-proxy 
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     labels:
       traefik.enable: true
       traefik.http.routers.traefik-rtr.entrypoints: https
-      traefik.http.routers.traefik-rtr.rule: Host(`$TRAEFIK_DOMAINNAME`)
+      traefik.http.routers.traefik-rtr.rule: Host(`traefik.${DOMAINNAME}`)
       traefik.http.routers.traefik-rtr.tls.certresolver: dns-cloudflare
-      traefik.http.routers.traefik-rtr.tls.domains[0].main: "$DOMAINNAME"
-      traefik.http.routers.traefik-rtr.tls.domains[0].sans: "*.$DOMAINNAME"
-      # traefik.http.routers.traefik-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.traefik-rtr.tls: true
-      traefik.http.routers.traefik-rtr.tls.options: tls-opts@file
+      traefik.http.routers.traefik-rtr.tls.domains[0].main: "${DOMAINNAME}"
+      traefik.http.routers.traefik-rtr.tls.domains[0].sans: "*.${DOMAINNAME}"
+      traefik.http.routers.traefik-rtr.middlewares: local-ip@file 
+      # Route to Traefik's internal API/dashboard service
       traefik.http.routers.traefik-rtr.service: api@internal

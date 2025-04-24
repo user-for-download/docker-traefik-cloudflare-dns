@@ -3,9 +3,12 @@ services:
   socket-proxy:
     container_name: socket-proxy
     image: tecnativa/docker-socket-proxy
-    security_opt: [no-new-privileges:true]
-    restart: unless-stopped
-    profiles: ["core", "all"]
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    profiles:
+      - core
+      - all
     networks:
       socket_proxy:
         ipv4_address: 172.16.80.254
@@ -14,9 +17,9 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
       - LOG_LEVEL=info
-      - DISABLE_IPV6=1
       - EVENTS=1
       - PING=1
+      - DISABLE_IPV6=1
       - VERSION=1
       - AUTH=0
       - SECRETS=0

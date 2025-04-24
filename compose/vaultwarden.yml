@@ -23,8 +23,6 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.vltwrn-rtr.entrypoints: https
-      traefik.http.routers.vltwrn-rtr.rule: Host(`$VLTWRN_DOMAINNAME`)
+      traefik.http.routers.vltwrn-rtr.rule: Host(`vltwrn.${DOMAINNAME}`)
       traefik.http.routers.vltwrn-rtr.service: vltwrn-svc
       traefik.http.services.vltwrn-svc.loadbalancer.server.port: 80
-      traefik.http.routers.vltwrn-rtr.tls: true
-      traefik.http.routers.vltwrn-rtr.tls.options: tls-opts@file

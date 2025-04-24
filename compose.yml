@@ -4,32 +4,25 @@ networks:
   net_t2:
     name: net_t2
     external: true
-
   socket_proxy:
     name: socket_proxy
     external: true
-
   net_db:
     name: net_db
     external: true
-
   net_redis:
     name: net_redis
     external: true
 
-########################### SECRETS
-
 secrets:
-  #traefik
+  # Traefik
   htpasswd:
     file: $DOCKERDIR/secrets/htpasswd
-  cf_email:
-    file: $DOCKERDIR/secrets/cf/cf_email
   cf_dns_api_token:
     file: $DOCKERDIR/secrets/cf/cf_dns_api_token
-  cf_token:
-    file: $DOCKERDIR/secrets/cf/cf_token
-  #authelia
+  crowdsec_api_key:
+    file: $DOCKERDIR/secrets/crowdsec_api_key
+  # Authelia
   authelia_jwt_secret:
     file: $DOCKERDIR/secrets/authelia/jwt_secret
   authelia_session_secret:
@@ -38,61 +31,43 @@ secrets:
     file: $DOCKERDIR/secrets/authelia/storage_mysql_password
   authelia_storage_encryption_key:
     file: $DOCKERDIR/secrets/authelia/storage_encryption_key
-  #db
+  # Database
   mysql_root_password:
     file: $DOCKERDIR/secrets/db/mysql_root_password
-  #redis
+  # Vaultwarden
   vaultwarden_admin_token:
     file: $DOCKERDIR/secrets/vl/vaultwarden_admin_token
+
 include:
-  # core
+  # Core
   - compose/traefik.yml
   - compose/socket-proxy.yml
   - compose/portainer.yml
-  # db
+  # Database
   - compose/mariadb.yml
   - compose/redis.yml
   - compose/influxdb.yml
-  # monitoring
+  # Monitoring
   - compose/uptime-kuma.yml
-  #- compose/glances.yml
-  # auth
+  # Auth
   - compose/authelia.yml
-  # src
-  - compose/phpmyadmin.yml
-  # apps
-  #- compose/it-tools.yml
-  #- compose/owncloud.yml
+  # Apps
   - compose/vaultwarden.yml
   - compose/dozzle.yml
-  #- compose/filebr.yml
   - compose/whats-up-docker.yml
-  # crowdsec
-  - compose/crowdsec.yml
-  #- compose/crowdsec-db.yml
-  # adguard
+  # Adguard
   - compose/traefik-certs-dumper.yml
-  - compose/adquard.yml
+  - compose/adguard.yml
+  # Crowdsec
+  - compose/crowdsec.yml
+
 volumes:
-  #
   portainer_data: {}
-  #
   kuma-data: {}
   influxdb_data: {}
-  #
   authelia_data: {}
-  #
   redis_data: {}
   mariadb_data: {}
-  #
-  owncloud_files: {}
-  #
-  crowdsec_data: {}
-  #
   vaultwarden: {}
-  #
-  adquard: {}
-  #
-  filebrowser_data: {}
-  #
+  adguard: {}
   whats-up-docker: {}

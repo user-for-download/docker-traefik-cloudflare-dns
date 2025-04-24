@@ -12,9 +12,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.whoami-rtr.entrypoints: https
-      traefik.http.routers.whoami-rtr.rule: Host(`$WHOAMI_DOMAINNAME`)
+      traefik.http.routers.whoami-rtr.rule: Host(`whoami.${DOMAINNAME}`)
       traefik.http.routers.whoami-rtr.service: whoami-svc
       traefik.http.services.whoami-svc.loadbalancer.server.port: 8082
-      #traefik.http.routers.whoami-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.whoami-rtr.tls: true
-      traefik.http.routers.whoami-rtr.tls.options: tls-opts@file
+      #traefik.http.routers.whoami-rtr.middlewares: authelia@file

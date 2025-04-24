@@ -31,8 +31,6 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.owncloud-rtr.entrypoints: https
-      traefik.http.routers.owncloud-rtr.rule: Host(`$OWN_DOMAINNAME`)
+      traefik.http.routers.owncloud-rtr.rule: Host(`owncloud.${DOMAINNAME}`)
       traefik.http.routers.owncloud-rtr.service: owncloud-svc
       traefik.http.services.owncloud-svc.loadbalancer.server.port: 8080
-      traefik.http.routers.owncloud-rtr.tls: true
-      traefik.http.routers.owncloud-rtr.tls.options: tls-opts@file

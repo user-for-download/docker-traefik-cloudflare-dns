@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     networks: [net_t2]
     security_opt: [no-new-privileges:true]
+    cap_add:
+      - NET_ADMIN
     profiles: ["adguard", "all"]
     environment:
       - PUID=$PUID
@@ -13,11 +15,17 @@ services:
     volumes:
       - $APPDIR/adguardhome/conf:/opt/adguardhome/conf
       - $APPDIR/adguardhome/work:/opt/adguardhome/work
-      - adquard:/opt/adguardhome/vol
+      - adguard:/opt/adguardhome/vol
     labels:
       traefik.enable: true
-      traefik.tcp.routers.adg-rtr.entrypoints: https
-      traefik.tcp.routers.adg-rtr.rule: HostSNI(`$DNS_DOMAINNAME`)
-      traefik.tcp.routers.adg-rtr.service: adg-svc
-      traefik.tcp.routers.adg-rtr.tls.passthrough: true
-      traefik.tcp.services.adg-svc.loadbalancer.server.port: 443
+      # traefik.tcp.routers.adg-rtr.entrypoints: https
+      # traefik.tcp.routers.adg-rtr.rule: HostSNI(`dns.${DOMAINNAME}`)
+      # traefik.tcp.routers.adg-rtr.service: adg-svc
+      # traefik.tcp.routers.adg-rtr.tls.options: default
+      # traefik.tcp.routers.adg-rtr.tls.passthrough: true
+      # traefik.tcp.services.adg-svc.loadbalancer.server.port: 443
+      ##### For first run (next, change to TCP)
+      traefik.http.routers.adg-rtr.entrypoints: https
+      traefik.http.routers.adg-rtr.rule: Host(`dns.${DOMAINNAME}`)
+      traefik.http.routers.adg-rtr.service: adg-svc
+      traefik.http.services.adg-svc.loadbalancer.server.port: 80

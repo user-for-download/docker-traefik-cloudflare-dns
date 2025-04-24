@@ -1,80 +1,107 @@
 http:
   middlewares:
-    middlewares-basic-auth:
+    basic-auth:
       basicAuth:
-        # users:
-        #   - "admin:$apr1$t2wvh04n$J/LHZ3lxT6Rztl./Fc3Z11"
-        # pwd: RMQ8KBrhwnQMuLWB
-        usersFile: "/run/secrets/htpasswd"
-        realm: "Traefik 2 Basic Auth"
-
-    middlewares-rate-limit:
+        usersFile: /run/secrets/htpasswd
+        realm: Traefik 2 Basic Auth
+    authelia:
+      forwardAuth:
+        address: >-
+          http://authelia:9091/api/verify?rd=https://auth.{{env
+          "DOMAINNAME_CLOUD_SERVER"}}
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Groups
+    rate-limit:
       rateLimit:
         average: 200
         burst: 100
-
-    middlewares-https-redirectscheme:
-      redirectScheme:
-        scheme: https
-        permanent: true
-
-    middlewares-secure-headers:
-      headers:
-        accessControlAllowMethods:
-          - GET
-          - OPTIONS
-          - PUT
-        accessControlMaxAge: 100
-        browserXssFilter: true
-        customBrowserXSSValue: "0"
-        hostsProxyHeaders:
-          - "X-Forwarded-Host"
-        stsSeconds: 63072000
-        stsIncludeSubdomains: true
-        stsPreload: true
-        forceSTSHeader: true
-        customFrameOptionsValue: SAMEORIGIN # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
-        contentTypeNosniff: true
-        referrerPolicy: "same-origin"
-        permissionsPolicy: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), vr=()"
-        customResponseHeaders:
-          X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex," # disable search engines from indexing home server
-          server: "" # hide server info from visitors
-    
-    middlewares-nextcloud-redirect:
-      redirectRegex:
-        permanent: true
-        regex: 'https://(.*)/.well-known/(card|cal)dav'
-        replacement: 'https://${1}/remote.php/dav/'
-
-    middlewares-nextcloud-headers:
-      headers:
-        stsincludesubdomains: false
-        stspreload: true
-        stsseconds: 31536000
-        isdevelopment: false
-
-    middlewares-authelia:
-      forwardAuth:
-        address: "http://authelia:9091/api/verify?rd=https://auth.{{env "DOMAINNAME_CLOUD_SERVER"}}"
-        trustForwardHeader: true
-        authResponseHeaders:
-          - "Remote-User"
-          - "Remote-Groups"
-
-    middlewares-compress:
-      compress: {}
-    
-    middlewares-local-ip:
-      ipWhiteList:
+    local-ip:
+      ipAllowList:
         sourceRange:
           - 127.0.0.1/32
           - 10.0.0.0/8
           - 192.168.0.0/16
           - 172.16.0.0/12
-
-    my-crowdsec-bouncer-traefik-plugin:
-        plugin:
-            crowdsec-bouncer-traefik-plugin:
-                CrowdsecLapiKey: =KEY=
-                Enabled: "false"
+    crowdsec-bouncer:
+      plugin:
+        crowdsec-bouncer-traefik-plugin:
+          CrowdsecLapiFile: /run/secrets/crowdsec_api_key
+          CrowdsecMode: ban
+          CrowdsecAppsecEnabled: false
+          CrowdsecAppsecHost: 'http://crowdsec:8080'
+          ClientTrustedIPs:
+            - 127.0.0.1/32
+            - 192.168.0.0/16
+          Enabled: false
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+    secure-headers:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: false
+        forceSTSHeader: true
+        customFrameOptionsValue: SAMEORIGIN
+        contentTypeNosniff: true
+        referrerPolicy: strict-origin-when-cross-origin
+        permissionsPolicy: >-
+          camera=(), microphone=(), geolocation=(), payment=(), usb=(),
+          execution-while-out-of-focus=(), execution-while-not-rendered=(),
+          sync-xhr=()
+        customResponseHeaders: null
+        hostsProxyHeaders:
+          - X-Forwarded-Host
+    nextcloud-redirect:
+      redirectRegex:
+        permanent: true
+        regex: '^https://(.*)/.well-known/(card|cal)dav'
+        replacement: 'https://${1}/remote.php/dav/'
+    nextcloud-headers:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: false
+        stsPreload: false
+        forceSTSHeader: true
+        customFrameOptionsValue: SAMEORIGIN
+        contentTypeNosniff: true
+        referrerPolicy: strict-origin-when-cross-origin
+        permissionsPolicy: >-
+          camera=(), microphone=(), geolocation=(), payment=(), usb=(),
+          execution-while-out-of-focus=(), execution-while-not-rendered=(),
+          sync-xhr=()
+        customResponseHeaders:
+          Server: ''
+    compress:
+      compress:
+        minResponseBodyBytes: 1024
+    chain-no-auth:
+      chain:
+        middlewares:
+          - rate-limit
+          - secure-headers
+          - compress
+    chain-authelia:
+      chain:
+        middlewares:
+          - rate-limit
+          - secure-headers
+          - authelia
+          - compress
+    chain-nextcloud:
+      chain:
+        middlewares:
+          - rate-limit
+          - nextcloud-headers
+          - compress
+    chain-internal-authelia:
+      chain:
+        middlewares:
+          - rate-limit
+          - local-ip
+          - authelia
+          - secure-headers
+          - compress

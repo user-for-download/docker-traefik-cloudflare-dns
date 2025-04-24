@@ -1,13 +1,18 @@
 services:
-  # Portainer
   portainer:
     container_name: portainer
     image: portainer/portainer-ce
     command: -H tcp://socket-proxy:2375
-    security_opt: [no-new-privileges:true]
-    profiles: ["core", "all"]
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    profiles:
+      - core
+      - all
     restart: unless-stopped
-    networks: [net_t2, socket_proxy]
+    networks:
+      - net_t2
+      - socket_proxy
     volumes:
       - portainer_data:/data
     environment:
@@ -15,9 +20,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.portainer-rtr.entrypoints: https
-      traefik.http.routers.portainer-rtr.rule: Host(`$PORTAINER_DOMAINNAME`)
+      traefik.http.routers.portainer-rtr.rule: Host(`portainer.${DOMAINNAME}`)
       traefik.http.routers.portainer-rtr.service: portainer-svc
       traefik.http.services.portainer-svc.loadbalancer.server.port: 9000
-      #traefik.http.routers.portainer-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.portainer-rtr.tls: true
-      traefik.http.routers.portainer-rtr.tls.options: tls-opts@file
+      traefik.http.routers.portainer-rtr.middlewares: local-ip@file

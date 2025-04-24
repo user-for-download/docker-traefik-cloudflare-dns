@@ -15,9 +15,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.influxdb-rtr.entrypoints: https
-      traefik.http.routers.influxdb-rtr.rule: Host(`$INF_DOMAINNAME`)
+      traefik.http.routers.influxdb-rtr.rule: Host(`inf.${DOMAINNAME}`)
       traefik.http.routers.influxdb-rtr.service: influxdb-svc
       traefik.http.services.influxdb-svc.loadbalancer.server.port: 8086
-      #traefik.http.routers.influxdb-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.influxdb-rtr.tls: true
-      traefik.http.routers.influxdb-rtr.tls.options: tls-opts@file
+      #traefik.http.routers.influxdb-rtr.middlewares: authelia@file

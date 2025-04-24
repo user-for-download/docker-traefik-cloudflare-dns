@@ -23,9 +23,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.wud-rtr.entrypoints: https
-      traefik.http.routers.wud-rtr.rule: Host(`$WUD_DOMAINNAME`)
+      traefik.http.routers.wud-rtr.rule: Host(`wud.${DOMAINNAME}`)
       traefik.http.routers.wud-rtr.service: wud-svc
       traefik.http.services.wud-svc.loadbalancer.server.port: 3000
-      traefik.http.routers.wud-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.wud-rtr.tls: true
-      traefik.http.routers.wud-rtr.tls.options: tls-opts@file
+      traefik.http.routers.wud-rtr.middlewares: authelia@file

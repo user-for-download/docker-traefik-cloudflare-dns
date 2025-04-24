@@ -10,9 +10,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.it-tools-rtr.entrypoints: https
-      traefik.http.routers.it-tools-rtr.rule: Host(`$ITTL_DOMAINNAME`)
+      traefik.http.routers.it-tools-rtr.rule: Host(`it.${DOMAINNAME}`)
       traefik.http.routers.it-tools-rtr.service: it-tools-svc
       traefik.http.services.it-tools-svc.loadbalancer.server.port: 80
-      #traefik.http.routers.it-tools-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.it-tools-rtr.tls: true
-      traefik.http.routers.it-tools-rtr.tls.options: tls-opts@file
+      #traefik.http.routers.it-tools-rtr.middlewares: authelia@file

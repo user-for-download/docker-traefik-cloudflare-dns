@@ -22,5 +22,5 @@ services:
 #      traefik.http.routers.glns-rtr.rule: Host(`$GL_DOMAINNAME`)
 #      traefik.http.routers.glns-rtr.service: glns-svc
 #      traefik.http.services.glns-svc.loadbalancer.server.port: 61208
-#      #traefik.http.routers.glns-rtr.middlewares: middlewares-authelia@file
+#      #traefik.http.routers.glns-rtr.middlewares: authelia@file
 #      traefik.http.routers.glns-rtr.tls: true

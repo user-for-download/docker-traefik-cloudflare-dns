@@ -16,9 +16,7 @@ services:
     labels:
       traefik.enable: true
       traefik.http.routers.filebr-rtr.entrypoints: https
-      traefik.http.routers.filebr-rtr.rule: Host(`$FILE_DOMAINNAME`)
+      traefik.http.routers.filebr-rtr.rule: Host(`file.${DOMAINNAME}`)
       traefik.http.routers.filebr-rtr.service: filebr-svc
       traefik.http.services.filebr-svc.loadbalancer.server.port: 80
-      traefik.http.routers.filebr-rtr.middlewares: middlewares-authelia@file
-      traefik.http.routers.filebr-rtr.tls: true
-      traefik.http.routers.filebr-rtr.tls.options: tls-opts@file
+      traefik.http.routers.filebr-rtr.middlewares: authelia@file
