@@ -1,0 +1,19 @@
+http:
+  routers:
+    dashboard:
+      rule: Host(`traefik.binetc.store`)
+      service: "api@internal" 
+      entryPoints:
+        - "https"
+      tls:
+        certResolver: "dns-cloudflare"
+      middlewares:
+        - "dashboard-auth"
+        - "local-ip"
+
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+        # echo $(htpasswd -nb admin your-secure-password) > ./secrets/htpasswd
+          - "admin:123123" 

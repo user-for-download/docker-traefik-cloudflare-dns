@@ -39,6 +39,7 @@ http:
       redirectScheme:
         scheme: https
         permanent: true
+
     secure-headers:
       headers:
         stsSeconds: 31536000
@@ -49,10 +50,9 @@ http:
         contentTypeNosniff: true
         referrerPolicy: strict-origin-when-cross-origin
         permissionsPolicy: >-
-          camera=(), microphone=(), geolocation=(), payment=(), usb=(),
-          execution-while-out-of-focus=(), execution-while-not-rendered=(),
-          sync-xhr=()
-        customResponseHeaders: null
+          camera=(), microphone=(), geolocation=(), payment=(), usb=(), sync-xhr=()
+        customResponseHeaders:
+          X-Robots-Tag: "noindex, nofollow, noarchive, nosnippet"
         hostsProxyHeaders:
           - X-Forwarded-Host
     nextcloud-redirect:
@@ -83,6 +83,7 @@ http:
         middlewares:
           - rate-limit
           - secure-headers
+          - https-redirectscheme
           - compress
     chain-authelia:
       chain:
@@ -90,6 +91,7 @@ http:
           - rate-limit
           - secure-headers
           - authelia
+          - https-redirectscheme
           - compress
     chain-nextcloud:
       chain:
@@ -97,6 +99,7 @@ http:
           - rate-limit
           - nextcloud-headers
           - compress
+          - https-redirectscheme
     chain-internal-authelia:
       chain:
         middlewares:
@@ -105,3 +108,12 @@ http:
           - authelia
           - secure-headers
           - compress
+          - https-redirectscheme
+    chain-internal:
+          chain:
+            middlewares:
+              - rate-limit
+              - local-ip
+              - secure-headers
+              - compress
+              - https-redirectscheme

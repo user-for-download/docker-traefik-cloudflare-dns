@@ -4,11 +4,9 @@ services:
     image: traefik
     security_opt:
       - no-new-privileges:true
-    #user: "1000:1000"
+    user: "1000:1000"
     restart: always
-    profiles:
-      - core
-      - all
+    profiles: ["core", "all"]
     networks:
       net_t2: 
         ipv4_address: 172.16.90.254
@@ -17,12 +15,16 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # This file needs write permissions for the user specified above.
       - "${APPDIR}/traefik/acme/acme.json:/acme.json"
+      # This directory needs write permissions for the user specified above.
       - "${DOCKERDIR}/logs/traefik:/logs"
+      # Configuration is correctly mounted as read-only.
       - "${APPDIR}/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
       - "${APPDIR}/traefik/rules:/etc/traefik/rules:ro"
     environment:
       - TZ=${TZ}
+      # This is the best practice for handling the API token.
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
       - DOMAINNAME_CLOUD_SERVER=${DOMAINNAME_CLOUD_SERVER}
     secrets:
@@ -37,13 +39,3 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
-    labels:
-      traefik.enable: true
-      traefik.http.routers.traefik-rtr.entrypoints: https
-      traefik.http.routers.traefik-rtr.rule: Host(`traefik.${DOMAINNAME}`)
-      traefik.http.routers.traefik-rtr.tls.certresolver: dns-cloudflare
-      traefik.http.routers.traefik-rtr.tls.domains[0].main: "${DOMAINNAME}"
-      traefik.http.routers.traefik-rtr.tls.domains[0].sans: "*.${DOMAINNAME}"
-      traefik.http.routers.traefik-rtr.middlewares: local-ip@file 
-      # Route to Traefik's internal API/dashboard service
-      traefik.http.routers.traefik-rtr.service: api@internal

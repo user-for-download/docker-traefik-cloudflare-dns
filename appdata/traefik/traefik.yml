@@ -3,23 +3,21 @@ global:
   sendAnonymousUsage: false
 
 ping:
-  entryPoint: "ping"
+  entryPoint: "ping" 
 
 entryPoints:
   http:
     address: :80
-    http:
-      middlewares:
-        - https-redirectscheme@file
+    # http:
+    #   middlewares:
+    #     - https-redirectscheme@file
   https:
     address: :443
     forwardedHeaders:
       trustedIPs:
         - "127.0.0.1/32"
-        # - "10.0.0.0/8"
         - "192.168.0.0/16"
-        # - "172.16.0.0/12"
-        # Cloudflare IPs (verify list if needed)
+        # Cloudflare IPs - It's a good practice
         - "173.245.48.0/20"
         - "103.21.244.0/22"
         - "103.22.200.0/22"
@@ -44,10 +42,9 @@ entryPoints:
   ping:
     address: ":8082" 
 
-
 api:
   dashboard: true
-  insecure: false 
+  insecure: false
 
 log:
   filePath: /logs/traefik.log
@@ -56,12 +53,12 @@ log:
 
 accessLog:
   filePath: /logs/access.log
-  format: json 
+  format: json
   bufferingSize: 100
   filters:
     retryAttempts: true
     statusCodes:
-      - "200-599" 
+      - "200-599"
   fields:
     names:
       StartUTC: drop
@@ -69,12 +66,15 @@ accessLog:
 certificatesResolvers:
   dns-cloudflare:
     acme:
-      # caServer: https://acme-staging-v02.api.letsencrypt.org/directory # Use staging during testing!
-      caServer: https://acme-v02.api.letsencrypt.org/directory
-      email: email@com.com
-      storage: /acme.json 
-      dnsChallenge:
-        provider: cloudflare
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory # Use staging during testing!
+      # caServer: https://acme-v02.api.letsencrypt.org/directory
+      email: 954721@mail.ru
+      storage: /acme.json
+      httpChallenge:
+        entryPoint: http
+      # dnsChallenge:
+      #   provider: cloudflare
+
 
 metrics:
   influxDB2:
@@ -83,17 +83,17 @@ metrics:
     addRoutersLabels: true
     address: http://influxdb:8086
     bucket: tr
-    org: SITE.COM 
+    org: binetc.store
     pushInterval: 30s
-    token: PV7IB_Uqi5h08YnhZwN26_VXZkCe50cGGodloAsw==
+    token: ==========PV7IB_Uqi5modloAsw==============
     additionalLabels:
       environment: production
-      host: SITE.COM
+      host: binetc.store
 
 providers:
   docker:
-    endpoint: tcp://socket-proxy:2375 
-    exposedByDefault: false 
+    endpoint: tcp://socket-proxy:2375
+    exposedByDefault: false
     network: net_t2
   file:
     directory: /etc/traefik/rules
@@ -114,7 +114,7 @@ tls:
         - CurveP521
         - CurveP384
         - CurveP256
-      sniStrict: true 
+      sniStrict: true
 
     mintls13:
       minVersion: VersionTLS13
