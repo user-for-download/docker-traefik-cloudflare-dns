@@ -1,79 +1,127 @@
-formated
-# docker-traefik-cloudflare-dns
-> Linux 5.15.0-97-generic #107-Ubuntu SMP Wed Feb 7 13:26:48 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux; default user ubuntu (1000,1000)
+# `README.md` for Docker Traefik Cloudflare DNS Setup
 
-The latest versions of dockers were used on the publication mark. Now they may not be compatible! Be careful.
+> **System Requirements:**  
+> Linux 5.15.0-97-generic #107-Ubuntu SMP  
+> x86_64 GNU/Linux  
+> Default user: ubuntu (UID 1000, GID 1000)  
+>  
+> ⚠️ **Note:** The latest versions of Docker services were used at the time of publication. Compatibility may vary over time.
 
-## Features
-- adquard.yml
-- authelia.yml
-- crowdsec-db.yml
-- crowdsec.yml
-- dozzle.yml
-- filebr.yml
-- glances.yml
-- influxdb.yml
-- it-tools.yml
-- mariadb.yml
-- owncloud.yml
-- phpmyadmin.yml
-- portainer.yml
-- redis.yml
-- socket-proxy.yml
-- syncthing.yml
-- traefik-certs-dumper.yml
-- traefik.yml
-- uptime-kuma.yml
-- vaultwarden.yml
-- whoami.yml
+---
 
-## Note
-> default work path /home/<USERS>
+## 🧩 Features
 
-# Clone git
+This Docker setup provides a comprehensive, secure, and self-hosted infrastructure with the following services:
+
+| Service | Description |
+|--------|-------------|
+| **Traefik** | Reverse proxy with Let's Encrypt integration |
+| **Authelia** | Single Sign-On (SSO) and 2FA authentication |
+| **Crowdsec** | Intrusion detection and prevention system |
+| **AdGuardHome** | Network-wide ad blocking via DNS |
+| **Portainer** | Docker management UI |
+| **Vaultwarden** | Bitwarden-compatible password manager |
+| **InfluxDB & Glances** | System monitoring and metrics |
+| **Uptime Kuma** | Uptime monitoring dashboard |
+| **Dozzle** | Real-time Docker log viewer |
+| **What's Up Docker** | Docker update notifier |
+| **MariaDB, Redis** | Database backends |
+| **Socket Proxy** | Secure Docker socket proxy |
+
+---
+
+## 📁 Directory Structure
+
+- **`appdata/`** - Application-specific data
+- **`secrets/`** - Sensitive credentials and keys
+- **`compose/`** - Docker Compose service definitions
+- **`logs/`** - Log files for services
+- **`.env`** - Environment variables
+- **`compose.yml`** - Main Docker Compose configuration
+- **`README.md`** - This file
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Clone the Repository
+
 ```bash
 mkdir git && cd git
 git clone https://github.com/user-for-download/docker-traefik-cloudflare-dns.git
+cd docker-traefik-cloudflare-dns
 ```
 
-## Create new secrets for db and authelia
+---
+
+### 2. Create Secrets
+
 ```bash
 cd secrets
 cd authelia && for i in *; do openssl rand -hex 16 > $i; done && cd ..
 cd db && for i in *; do openssl rand -hex 16 > $i; done && cd ..
 ```
-### Change .env
+
+---
+
+### 3. Configure Environment Variables
+
+Edit `.env` to match your system:
+
 ```bash
 nano .env
 ```
+
+Update the following:
+
 ```env
 ##### SYSTEM
-PUID=
-PGID=
-TZ=
+PUID=1000
+PGID=1000
+TZ=Europe/Moscow
 DOCKERDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns
 APPDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns/appdata
+
 ##### DOMAIN
-DOMAINNAME_CLOUD_SERVER=<SITE.COM>
-DOMAINNAME=<SITE.COM>
+DOMAINNAME_CLOUD_SERVER=yourdomain.com
+DOMAINNAME=yourdomain.com
 ```
-## Create new acme.json
+
+---
+
+### 4. Prepare Let's Encrypt Certificate Storage
+
 ```bash
 touch appdata/traefik/acme/acme.json
-chmod 600 appdata/traefik/acme/acme.json
+chmod 600 secrets/* appdata/traefik/acme/acme.json
 ```
-## Create networks docker
+
+---
+
+### 5. Create Docker Networks
+
 ```bash
 docker network create -d bridge socket_proxy --subnet 172.16.80.0/24
 docker network create -d bridge net_t2 --subnet 172.16.90.0/24
 docker network create -d bridge net_db --subnet 172.16.82.0/23
 docker network create -d bridge net_redis --subnet 172.16.84.0/23
 ```
-# After install
-## Create logrotate
+### 6. Run core
 ```bash
-nano /etc/logrotate.d/traefik  
+docker-compose --profile core up -d
 ```
+---
+
+## 🛠️ Post-Install Setup
+
+### 1. Set Up Log Rotation for Traefik
+
+```bash
+sudo nano /etc/logrotate.d/traefik
+```
+
+Add:
+
 ```bash
 /<PATH-TO-LOGS>/logs/traefik/*.log {
     daily
@@ -86,37 +134,53 @@ nano /etc/logrotate.d/traefik
     endscript
 }
 ```
+
+Test:
+
 ```bash
-logrotate /etc/logrotate.conf --debug  
+logrotate /etc/logrotate.conf --debug
 ```
-## Crowdsec firewall bouncer iptables
+
+---
+
+### 2. Set Up Crowdsec Firewall Bouncer
+
 ```bash
 sudo apt install crowdsec-firewall-bouncer-iptables
-```
-```bash
 docker exec -t crowdsec cscli bouncers add host-firewall-bouncer-dshb
 ```
-> pS4zcase9EEyCJQ/IaHDiYYOddutA8HZSsRFGIR8Epg
+
+Edit config:
+
 ```bash
 sudo nano /etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml
 ```
-settings:
-> https://www.smarthomebeginner.com/crowdsec-docker-compose-1-fw-bouncer/
 
-```bash	
+Restart service:
+
+```bash
 sudo systemctl restart crowdsec-firewall-bouncer.service
 ```
-```bash	
+
+Check logs:
+
+```bash
 cat /var/log/crowdsec-firewall-bouncer.log
 ```
-## Crowdsec create whitelists
-```bash	
+
+---
+
+### 3. Add Custom Whitelists to Crowdsec
+
+```bash
 nano appdata/crowdsec/parsers/s02-enrich/mywhitelists.yaml
 ```
-```bash
-name: "my/whitelistlocal" ## Must be unique
+
+Example:
+
+```yaml
+name: "my/whitelistlocal"
 description: "Whitelist events from my ipv4 addresses"
-#it's a normal parser, so we can restrict its scope with filter
 filter: "1 == 1"
 whitelist:
   reason: "my ipv4 ranges"
@@ -125,19 +189,79 @@ whitelist:
   cidr:
     - "192.168.0.0/16"
 ```
-# Add authelia
-## run DB 
-```bash	
+
+---
+
+## 🔐 Authelia Setup
+
+### 1. Start the Database
+
+```bash
 docker-compose --profile db up -d
 ```
-```bash	
-docker exec -it <ID-DB> mysql -u root -p -e "
-CREATE USER 'authelia'@'%' IDENTIFIED BY '12345';
-GRANT USAGE ON *.* TO 'authelia'@'%' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+
+### 2. Create Authelia Database
+
+```bash
+docker exec -it <DB_CONTAINER_ID> mysql -u root -p -e "
+CREATE USER 'authelia'@'%' IDENTIFIED BY 'your-secure-password';
+GRANT USAGE ON *.* TO 'authelia'@'%';
 CREATE DATABASE IF NOT EXISTS \`authelia\`;
 GRANT ALL PRIVILEGES ON \`authelia\`.* TO 'authelia'@'%';
 "
 ```
-```bash	
-docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password '123456'
+
+### 3. Generate Password Hash
+
+```bash
+docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password 'your-secure-password'
 ```
+
+---
+
+## 📦 Services Overview
+
+| Service | URL | Description |
+|--------|-----|-------------|
+| **Traefik Dashboard** | `https://traefik.<yourdomain>` | Traefik reverse proxy UI |
+| **Authelia** | `https://auth.<yourdomain>` | Authentication gateway |
+| **Portainer** | `https://portainer.<yourdomain>` | Docker management UI |
+| **Vaultwarden** | `https://vltwrn.<yourdomain>` | Password manager |
+| **Uptime Kuma** | `https://kuma.<yourdomain>` | Uptime monitoring |
+| **Dozzle** | `https://dozz.<yourdomain>` | Docker logs viewer |
+| **What's Up Docker** | `https://wud.<yourdomain>` | Docker update notifier |
+
+---
+
+## ✅ Best Practices
+
+- **Security**: Use secrets management, read-only filesystems, and no-new-privileges policies.
+- **Backups**: Regularly back up `appdata/`, `secrets/`, and databases.
+- **Monitoring**: Use InfluxDB + Glances or Prometheus + Grafana for metrics.
+- **Updates**: Keep containers updated using Watchtower or What's Up Docker.
+- **Logs**: Use centralized logging and rotate logs regularly.
+
+---
+
+## 🧰 Maintenance Tips
+
+- Use `docker-compose` profiles to control which services start
+- Use `docker-compose config` to validate your configuration
+- Regularly check logs for errors and suspicious activity
+- Rotate secrets and credentials periodically
+
+---
+
+## 📞 Support
+
+For questions, issues, or feature requests, please open an issue on the GitHub repository.
+
+---
+
+## 📄 License
+
+This project is open-source and available under the MIT License.
+
+---
+
+> **Note:** Always verify the integrity and security of the configuration files and services before deploying to production. This setup is not a one-size-fits-all solution and may require adjustments based on your specific use case and infrastructure.

@@ -8,6 +8,7 @@ ping:
 entryPoints:
   http:
     address: :80
+    # use if dnsChallenge
     # http:
     #   middlewares:
     #     - https-redirectscheme@file
@@ -88,7 +89,7 @@ metrics:
     token: ==========PV7IB_Uqi5modloAsw==============
     additionalLabels:
       environment: production
-      host: binetc.store
+      host: <SITE.COM>
 
 providers:
   docker:
