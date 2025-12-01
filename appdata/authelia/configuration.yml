@@ -1,14 +1,12 @@
----
 ###############################################################################
 #                           Authelia Configuration                            #
 ###############################################################################
 theme: dark
-#jwt_secret: "YOUR_JWT_SECRET" in  secrets AUTHELIA_JWT_SECRET
-#default_redirection_url: https://auth.<SITE.COM>
 
 server:
   address: "tcp://0.0.0.0:9091"
   disable_healthcheck: false
+  
   endpoints:
     enable_pprof: false
     enable_expvars: false
@@ -29,7 +27,7 @@ ntp:
 
 log:
   level: warn
-  format: text
+  format: json
   file_path: /logs/authelia.%d.log
   keep_stdout: false
 
@@ -43,7 +41,7 @@ authentication_backend:
     disable: true
   refresh_interval: 5m
   file:
-    path: /config/users_database.yml
+    path: /config/users.yml
     password:
       algorithm: argon2id
       iterations: 1
@@ -98,7 +96,12 @@ notifier:
   disable_startup_check: true
   filesystem:
     filename: /data/notification.txt
-    
+
+identity_validation:
+  reset_password:
+    jwt_lifespan: 5m
+    jwt_algorithm: HS256
+
   #smtp:
   #  username: YOUR@EMAIL.HERE
   #  password: "YOUR_EMAIL_PASSWORD"

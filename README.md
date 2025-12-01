@@ -1,267 +1,390 @@
-# `README.md` for Docker Traefik Cloudflare DNS Setup
+# Docker Traefik Cloudflare DNS Stack
 
-> **System Requirements:**  
-> Linux 5.15.0-97-generic #107-Ubuntu SMP  
-> x86_64 GNU/Linux  
-> Default user: ubuntu (UID 1000, GID 1000)  
->  
-> ⚠️ **Note:** The latest versions of Docker services were used at the time of publication. Compatibility may vary over time.
+A production-ready Docker stack with Traefik reverse proxy, Cloudflare DNS challenge, Authelia authentication, and monitoring.
 
----
-
-## 🧩 Features
-
-This Docker setup provides a comprehensive, secure, and self-hosted infrastructure with the following services:
-
-| Service | Description |
-|--------|-------------|
-| **Traefik** | Reverse proxy with Let's Encrypt integration |
-| **Authelia** | Single Sign-On (SSO) and 2FA authentication |
-| **Crowdsec** | Intrusion detection and prevention system |
-| **AdGuardHome** | Network-wide ad blocking via DNS |
-| **Portainer** | Docker management UI |
-| **Vaultwarden** | Bitwarden-compatible password manager |
-| **InfluxDB & Glances** | System monitoring and metrics |
-| **Uptime Kuma** | Uptime monitoring dashboard |
-| **Dozzle** | Real-time Docker log viewer |
-| **What's Up Docker** | Docker update notifier |
-| **MariaDB, Redis** | Database backends |
-| **Socket Proxy** | Secure Docker socket proxy |
-
----
-
-## 📁 Directory Structure
-
-- **`appdata/`** - Application-specific data
-- **`secrets/`** - Sensitive credentials and keys
-- **`compose/`** - Docker Compose service definitions
-- **`logs/`** - Log files for services
-- **`.env`** - Environment variables
-- **`compose.yml`** - Main Docker Compose configuration
-- **`README.md`** - This file
-
----
-
-## 🚀 Quick Start Guide
-
-### 1. Clone the Repository
+## 📁 Project Structure
 
 ```bash
-mkdir git && cd git
-git clone https://github.com/user-for-download/docker-traefik-cloudflare-dns.git
-cd docker-traefik-cloudflare-dns
+docker-traefik-cloudflare-dns/
+├── appdata/
+│   ├── authelia/
+│   │   ├── configuration.yml
+│   │   └── users.yml
+│   └── traefik/
+│       ├── rules/
+│       ├── acme.json
+│       └── traefik.yml
+├── compose/
+│   ├── adguard.yml
+│   ├── authelia.yml
+│   ├── dozzle.yml
+│   ├── influxdb.yml
+│   ├── mariadb.yml
+│   ├── portainer.yml
+│   ├── redis.yml
+│   ├── socket-proxy.yml
+│   ├── telegraf.yml
+│   ├── traefik-certs-dumper.yml
+│   ├── traefik.yml
+│   ├── uptime-kuma.yml
+│   ├── vaultwarden.yml
+│   ├── whats-up-docker.yml
+│   └── whoami.yml
+├── logs/
+│   ├── authelia/
+│   └── traefik/
+├── secrets/
+│   ├── authelia/
+│   ├── cf/
+│   ├── db/
+│   ├── telegraf/
+│   └── vl/
+├── .env
+├── compose.yml
+└── README.md
 ```
 
----
+## 🚀 Quick Start
 
-### 2. Create Secrets
+### Prerequisites
+
+- Docker & Docker Compose
+- Cloudflare account with API token
+- Domain configured in Cloudflare
+
+### 1. Initial Setup
 
 ```bash
-cd secrets
-cd authelia && for i in *; do openssl rand -hex 16 > $i; done && cd ..
-cd db && for i in *; do openssl rand -hex 16 > $i; done && cd ..
+#!/bin/bash
+DIR=$(pwd)
+APPDIR="$DIR/appdata"
+
+# Create acme.json with correct permissions
+if [ ! -f "$APPDIR/traefik/acme.json" ]; then
+    rm -rf "$APPDIR/traefik/acme.json"
+    touch "$APPDIR/traefik/acme.json"
+    chmod 600 "$APPDIR/traefik/acme.json"
+    echo "Created acme.json"
+fi
+
+# Create Docker networks
+docker network create --subnet=172.16.90.0/24 net_t2
+docker network create --subnet=172.16.91.0/24 socket_proxy
+docker network create net_db
+docker network create net_redis
+
+echo "Networks created successfully!"
 ```
 
----
+### 2. Configure Secrets
 
-### 3. Configure Environment Variables
+Populate the following secret files:
 
-Edit `.env` to match your system:
+| File | Description |
+|------|-------------|
+| `secrets/cf/cf_dns_api_token` | Cloudflare DNS API token |
+| `secrets/db/mysql_root_password` | MariaDB root password |
+| `secrets/authelia/jwt_secret` | Authelia JWT secret |
+| `secrets/authelia/session_secret` | Authelia session secret |
+| `secrets/authelia/storage_encryption_key` | Authelia storage key |
+| `secrets/authelia/storage_mysql_password` | Authelia DB password |
 
 ```bash
-nano .env
+# Authelia secrets
+echo $(openssl rand -hex 32) > secrets/authelia/jwt_secret
+echo $(openssl rand -hex 32) > secrets/authelia/session_secret
+echo $(openssl rand -hex 32) > secrets/authelia/storage_encryption_key
+echo $(openssl rand -hex 32) > secrets/authelia/storage_mysql_password
+
+and others...
 ```
 
-Update the following:
+### 3. Update Configuration
 
-```env
-##### SYSTEM
+Edit `appdata/traefik/traefik.yml` with your domain settings.
+```yaml
+  https:
+    address: ':443'
+    http:
+      tls:
+        certResolver: dns-cloudflare
+        domains:
+          - main: <SITE.COM>
+            sans:
+              - '*.<SITE.COM>'
+```
+```yaml
+certificatesResolvers:
+  dns-cloudflare:
+    acme:
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory # Use staging during testing!
+      # caServer: 'https://acme-v02.api.letsencrypt.org/directory'
+      email: DNS@<SITE.COM>
+```
+---
+
+### 4 . Update env
+```bash
+# Timezone
+TZ=UTC
+
+# Domain
+DOMAINNAME=<SITE.COM>
+DOMAINNAME_CLOUD_SERVER=<SITE.COM>
+
+# Paths
+DOCKERDIR=/home/<USER>/<FOLDER>
+APPDIR=/home/<USER>/<FOLDER>/appdata
+LOGDIR=/home/<USER>/<FOLDER>/logs
+
+# InfluxDB
+INFLUXDB_USER=admin
+INFLUXDB_ORG=myorg
+INFLUXDB_BUCKET=default
+
+# User/Group IDs
 PUID=1000
 PGID=1000
-TZ=Europe/Moscow
-DOCKERDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns
-APPDIR=/home/<USERS>/git/docker-traefik-cloudflare-dns/appdata
+```
+---
 
-##### DOMAIN
-DOMAINNAME_CLOUD_SERVER=yourdomain.com
-DOMAINNAME=yourdomain.com
+## 📦 Deployment
+
+### Step 1: Start Core Services
+
+```bash
+docker compose --profile core up -d
+```
+
+Monitor ACME certificate generation:
+```bash
+docker compose logs -f traefik
+```
+
+### Step 2: Start Database Services
+
+```bash
+docker compose --profile database up -d
 ```
 
 ---
 
-### 4. Prepare Let's Encrypt Certificate Storage
+## 📊 InfluxDB Setup
+
+### Create Buckets and Tokens
 
 ```bash
-touch appdata/traefik/acme/acme.json
-chmod 600 secrets/* appdata/traefik/acme/acme.json
+# Create Docker metrics bucket
+docker exec influxdb influx bucket create \
+  --name docker \
+  --org myorg \
+  --retention 30d
+
+# Note the bucket ID, then create auth token
+docker exec influxdb influx auth create \
+  --org myorg \
+  --description "telegraf" \
+  --write-bucket <DOCKER_BUCKET_ID> \
+  --read-bucket <DOCKER_BUCKET_ID>
 ```
 
----
-
-### 5. Create Docker Networks
+Save the token to `secrets/telegraf/influx_token`
 
 ```bash
-docker network create -d bridge socket_proxy --subnet 172.16.80.0/24
-docker network create -d bridge net_t2 --subnet 172.16.90.0/24
-docker network create -d bridge net_db --subnet 172.16.82.0/23
-docker network create -d bridge net_redis --subnet 172.16.84.0/23
-```
-### 6. Run core
-```bash
-docker-compose --profile core up -d
-```
----
+# Create Traefik metrics bucket
+docker exec influxdb influx bucket create \
+  --name traefik \
+  --org myorg \
+  --retention 30d
 
-## 🛠️ Post-Install Setup
-
-### 1. Set Up Log Rotation for Traefik
-
-```bash
-sudo nano /etc/logrotate.d/traefik
+# Create Traefik auth token
+docker exec influxdb influx auth create \
+  --org myorg \
+  --description "traefik" \
+  --write-bucket <TRAEFIK_BUCKET_ID> \
+  --read-bucket <TRAEFIK_BUCKET_ID>
 ```
 
-Add:
+### Configure Traefik Metrics
 
-```bash
-/<PATH-TO-LOGS>/logs/traefik/*.log {
-    daily
-    rotate 30
-    missingok
-    notifempty
-    sharedscripts
-    postrotate
-      docker kill --signal="USR1" $(docker ps | grep traefik | awk '{print $1}') > /dev/null 2>&1 || true
-    endscript
-}
-```
-
-Test:
-
-```bash
-logrotate /etc/logrotate.conf --debug
-```
-
----
-
-### 2. Set Up Crowdsec Firewall Bouncer
-
-```bash
-sudo apt install crowdsec-firewall-bouncer-iptables
-docker exec -t crowdsec cscli bouncers add host-firewall-bouncer-dshb
-```
-
-Edit config:
-
-```bash
-sudo nano /etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml
-```
-
-Restart service:
-
-```bash
-sudo systemctl restart crowdsec-firewall-bouncer.service
-```
-
-Check logs:
-
-```bash
-cat /var/log/crowdsec-firewall-bouncer.log
-```
-
----
-
-### 3. Add Custom Whitelists to Crowdsec
-
-```bash
-nano appdata/crowdsec/parsers/s02-enrich/mywhitelists.yaml
-```
-
-Example:
+Add to `appdata/traefik/traefik.yml`:
 
 ```yaml
-name: "my/whitelistlocal"
-description: "Whitelist events from my ipv4 addresses"
-filter: "1 == 1"
-whitelist:
-  reason: "my ipv4 ranges"
-  ip:
-    - "127.0.0.1"
-  cidr:
-    - "192.168.0.0/16"
+metrics:
+  influxDB2:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+    address: "http://influxdb:8086"
+    bucket: traefik
+    org: myorg
+    pushInterval: 30s
+    token: "<-----------YOUR_TRAEFIK_TOKEN>----------------"
+    additionalLabels:
+      environment: production
+      host: "yourdomain.com" # change this!!!!
+```
+
+### Import Docker Dashboard Template
+
+```bash
+docker exec influxdb influx apply \
+  -f https://raw.githubusercontent.com/influxdata/community-templates/master/docker/docker.yml
+```
+
+This imports:
+- 1 Bucket: docker (7d retention)
+- 1 Telegraf Configuration
+- 1 Dashboard: Docker
+- 4 Alerts: Container CPU, memory, disk, non-zero exit
+
+### Restart Traefik
+
+```bash
+docker compose --profile core restart traefik
 ```
 
 ---
 
 ## 🔐 Authelia Setup
 
-### 1. Start the Database
+### Create Database
 
 ```bash
-docker-compose --profile db up -d
-```
+# Read passwords from secrets
+MYSQL_ROOT_PASS=$(cat secrets/db/mysql_root_password)
+AUTHELIA_DB_PASS=$(cat secrets/authelia/storage_mysql_password)
 
-### 2. Create Authelia Database
+# Create database and user
+docker exec -it mariadb mariadb -u root -p"${MYSQL_ROOT_PASS}" -e "
+CREATE DATABASE IF NOT EXISTS authelia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'authelia'@'%' IDENTIFIED BY '${AUTHELIA_DB_PASS}';
+GRANT ALL PRIVILEGES ON authelia.* TO 'authelia'@'%';
+FLUSH PRIVILEGES;
+"
 
-```bash
-docker exec -it <DB_CONTAINER_ID> mysql -u root -p -e "
-CREATE USER 'authelia'@'%' IDENTIFIED BY 'your-secure-password';
-GRANT USAGE ON *.* TO 'authelia'@'%';
-CREATE DATABASE IF NOT EXISTS \`authelia\`;
-GRANT ALL PRIVILEGES ON \`authelia\`.* TO 'authelia'@'%';
+# Verify
+docker exec -it mariadb mariadb -u root -p"${MYSQL_ROOT_PASS}" -e "
+SHOW DATABASES;
+SELECT User, Host FROM mysql.user;
 "
 ```
 
-### 3. Generate Password Hash
+### Set Permissions
 
 ```bash
-docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password 'your-secure-password'
+# Authelia logs
+sudo chown -R 1000:1000 logs/authelia
+sudo chmod 755 logs/authelia
+touch logs/authelia/notification.txt
+sudo chown 1000:1000 logs/authelia/notification.txt
+```
+
+### Start Authelia
+
+```bash
+docker compose --profile auth up -d
+```
+
+### Generate Password Hashes
+
+```bash
+docker exec -it authelia authelia crypto hash generate argon2 \
+  --password 'YOUR_SECURE_PASSWORD'
+```
+
+Create New user and add the hash to `appdata/authelia/users.yml`
+---
+
+## 🎯 Start Applications
+
+```bash
+docker compose --profile apps up -d
 ```
 
 ---
 
-## 📦 Services Overview
+## 🔧 Useful Commands
 
-| Service | URL | Description |
-|--------|-----|-------------|
-| **Traefik Dashboard** | `https://traefik.<yourdomain>` | Traefik reverse proxy UI |
-| **Authelia** | `https://auth.<yourdomain>` | Authentication gateway |
-| **Portainer** | `https://portainer.<yourdomain>` | Docker management UI |
-| **Vaultwarden** | `https://vltwrn.<yourdomain>` | Password manager |
-| **Uptime Kuma** | `https://kuma.<yourdomain>` | Uptime monitoring |
-| **Dozzle** | `https://dozz.<yourdomain>` | Docker logs viewer |
-| **What's Up Docker** | `https://wud.<yourdomain>` | Docker update notifier |
+### Verify Cloudflare Token
 
----
+```bash
+curl "https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/tokens/verify" \
+  -H "Authorization: Bearer <YOUR_TOKEN>"
+```
 
-## ✅ Best Practices
+### View Logs
 
-- **Security**: Use secrets management, read-only filesystems, and no-new-privileges policies.
-- **Backups**: Regularly back up `appdata/`, `secrets/`, and databases.
-- **Monitoring**: Use InfluxDB + Glances or Prometheus + Grafana for metrics.
-- **Updates**: Keep containers updated using Watchtower or What's Up Docker.
-- **Logs**: Use centralized logging and rotate logs regularly.
+```bash
+# All services
+docker compose logs -f
 
----
+# Specific service
+docker compose logs -f traefik
+docker compose logs -f authelia
+```
 
-## 🧰 Maintenance Tips
+### Restart Services
 
-- Use `docker-compose` profiles to control which services start
-- Use `docker-compose config` to validate your configuration
-- Regularly check logs for errors and suspicious activity
-- Rotate secrets and credentials periodically
+```bash
+docker compose --profile core restart
+docker compose --profile auth restart
+docker compose --profile apps restart
+```
 
 ---
 
-## 📞 Support
+## 🏷️ Compose Profiles
 
-For questions, issues, or feature requests, please open an issue on the GitHub repository.
+| Profile | Services |
+|---------|----------|
+| `core` | traefik, socket-proxy |
+| `database` | mariadb, redis, influxdb |
+| `auth` | authelia |
+| `apps` | All application services |
 
 ---
 
-## 📄 License
+## 🌐 Networks
 
-This project is open-source and available under the MIT License.
+| Network | Subnet | Purpose |
+|---------|--------|---------|
+| `net_t2` | 172.16.90.0/24 | Traefik frontend |
+| `socket_proxy` | 172.16.91.0/24 | Docker socket proxy |
+| `net_db` | auto | Database connections |
+| `net_redis` | auto | Redis connections |
 
 ---
 
-> **Note:** Always verify the integrity and security of the configuration files and services before deploying to production. This setup is not a one-size-fits-all solution and may require adjustments based on your specific use case and infrastructure.
+## 📚 Services Included
+
+- **Traefik** - Reverse proxy with automatic SSL
+- **Authelia** - SSO & 2FA authentication
+- **MariaDB** - Database server
+- **Redis** - Session storage
+- **InfluxDB** - Time-series metrics
+- **Telegraf** - Metrics collection
+- **Portainer** - Container management
+- **Dozzle** - Log viewer
+- **Vaultwarden** - Password manager
+- **AdGuard Home** - DNS & ad blocking
+- **Uptime Kuma** - Uptime monitoring
+- **What's Up Docker** - Update notifications
+
+---
+
+## 🛡️ Security Notes
+
+1. **Never commit secrets** - All sensitive data in `secrets/` folder
+2. **acme.json permissions** - Must be `600`
+3. **Socket proxy** - Isolates Docker socket access
+4. **Authelia** - Protects sensitive endpoints
+
+---
+
+## 📖 References
+
+- [Traefik Documentation](https://doc.traefik.io/traefik/)
+- [Authelia Documentation](https://www.authelia.com/docs/)
+- [InfluxDB Templates](https://github.com/influxdata/community-templates)
+- [Cloudflare API Tokens](https://developers.cloudflare.com/api/tokens/create/)

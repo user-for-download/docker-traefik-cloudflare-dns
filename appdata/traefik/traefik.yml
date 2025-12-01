@@ -1,57 +1,34 @@
 global:
   checkNewVersion: true
   sendAnonymousUsage: false
-
 ping:
-  entryPoint: "ping" 
-
+  entryPoint: ping
 entryPoints:
   http:
-    address: :80
-    # use if dnsChallenge
-    # http:
-    #   middlewares:
-    #     - https-redirectscheme@file
-  https:
-    address: :443
-    forwardedHeaders:
-      trustedIPs:
-        - "127.0.0.1/32"
-        - "192.168.0.0/16"
-        # Cloudflare IPs - It's a good practice
-        - "173.245.48.0/20"
-        - "103.21.244.0/22"
-        - "103.22.200.0/22"
-        - "103.31.4.0/22"
-        - "141.101.64.0/18"
-        - "108.162.192.0/18"
-        - "190.93.240.0/20"
-        - "188.114.96.0/20"
-        - "197.234.240.0/22"
-        - "198.41.128.0/17"
-        - "162.158.0.0/15"
-        - "104.16.0.0/13"
-        - "104.24.0.0/14"
-        - "172.64.0.0/13"
-        - "131.0.72.0/22"
+    address: ':80'
     http:
-      middlewares:
-        - chain-no-auth@file
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+  https:
+    address: ':443'
+    http:
       tls:
         certResolver: dns-cloudflare
-        options: default
+        domains:
+          - main: <SITE.COM>
+            sans:
+              - '*.<SITE.COM>'
   ping:
-    address: ":8082" 
-
+    address: ':8082'
 api:
   dashboard: true
   insecure: false
-
 log:
   filePath: /logs/traefik.log
   format: json
   level: INFO
-
 accessLog:
   filePath: /logs/access.log
   format: json
@@ -59,47 +36,46 @@ accessLog:
   filters:
     retryAttempts: true
     statusCodes:
-      - "200-599"
+      - 200-599
   fields:
     names:
       StartUTC: drop
-
 certificatesResolvers:
   dns-cloudflare:
     acme:
       caServer: https://acme-staging-v02.api.letsencrypt.org/directory # Use staging during testing!
-      # caServer: https://acme-v02.api.letsencrypt.org/directory
-      email: 954721@mail.ru
+      # caServer: 'https://acme-v02.api.letsencrypt.org/directory'
+      email: DNS@<SITE.COM>
       storage: /acme.json
-      httpChallenge:
-        entryPoint: http
-      # dnsChallenge:
-      #   provider: cloudflare
-
-
-metrics:
-  influxDB2:
-    addEntryPointsLabels: true
-    addServicesLabels: true
-    addRoutersLabels: true
-    address: http://influxdb:8086
-    bucket: tr
-    org: binetc.store
-    pushInterval: 30s
-    token: ==========PV7IB_Uqi5modloAsw==============
-    additionalLabels:
-      environment: production
-      host: <SITE.COM>
-
+      dnsChallenge:
+        provider: cloudflare
+        propagation:
+          delayBeforeChecks: 90s
+        resolvers:
+          - '1.1.1.1:53'
+          - '1.0.0.1:53'
+# metrics:
+#   influxDB2:
+#     addEntryPointsLabels: true
+#     addServicesLabels: true
+#     addRoutersLabels: true
+#     address: 'http://influxdb:8086'
+#     bucket: default
+#     org: myorg
+#     pushInterval: 30s
+#     token: >-
+#       2-EaJRcLN_Cee6-------------------------------T-PCQ8vkt8-Cbtrdh8xHn5VGdiQ==
+#     additionalLabels:
+#       environment: production
+#       host: <SITE.COM>
 providers:
   docker:
-    endpoint: tcp://socket-proxy:2375
+    endpoint: 'tcp://socket-proxy:2375'
     exposedByDefault: false
     network: net_t2
   file:
     directory: /etc/traefik/rules
     watch: true
-
 tls:
   options:
     default:
@@ -116,13 +92,12 @@ tls:
         - CurveP384
         - CurveP256
       sniStrict: true
-
     mintls13:
       minVersion: VersionTLS13
       cipherSuites:
-       - TLS_AES_128_GCM_SHA256
-       - TLS_AES_256_GCM_SHA384
-       - TLS_CHACHA20_POLY1305_SHA256
+        - TLS_AES_128_GCM_SHA256
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256
       curvePreferences:
         - CurveP521
         - CurveP384

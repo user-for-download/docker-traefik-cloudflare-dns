@@ -1,21 +1,22 @@
 services:
-  # mariadb
   mariadb:
     container_name: mariadb
-    image: "bitnami/mariadb:latest"
-    restart: unless-stopped
-    expose:
-      - 3306
-    volumes:
-      - mariadb_data:/bitnami/mariadb/data
-      - /etc/localtime:/etc/localtime:ro
-    secrets: [mysql_root_password]
+    image: mariadb:lts
     security_opt: [no-new-privileges:true]
+    restart: always
+    profiles: ["database", "all"]
     networks: [net_db]
-    profiles: ["db", "all"]
+    volumes:
+      - mariadb_data:/var/lib/mysql
     environment:
-      PUID: $PUID
-      PGID: $PGID
-      ALLOW_EMPTY_PASSWORD: no
-      MARIADB_SKIP_TEST_DB: yes
-      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      - TZ=${TZ}
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MARIADB_AUTO_UPGRADE=1
+    secrets:
+      - mysql_root_password
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

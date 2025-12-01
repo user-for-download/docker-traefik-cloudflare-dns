@@ -1,29 +1,24 @@
 services:
-  # Gets you notified when new versions of your Docker containers are
-  # available and lets you react the way you want.
-  whatsupdocker:
-    image: fmartinou/whats-up-docker
-    container_name: wud
+  whats-up-docker:
+    container_name: whats-up-docker
+    image: getwud/wud
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
     profiles: ["apps", "all"]
     networks: [net_t2, socket_proxy]
-    # volumes:
-    # - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WUD_WATCHER_MYREMOTEHOST_HOST=socket-proxy
-      - WUD_AUTH_BASIC_USER1_USER=user1
-      # dZx8C876KM7Mnxo5MS9B7uyem88Zju2b1
-      - WUD_AUTH_BASIC_USER1_HASH=${USER_HASH}
-      - WUD_TRIGGER_TELEGRAM_1_BOTTOKEN=${TELEGRAM_1_BOTTOKEN}
-      - WUD_TRIGGER_TELEGRAM_1_CHATID=${TELEGRAM_1_CHATID}
+    secrets:
+      - wud_auth_hash
     volumes:
       - whats-up-docker:/store
-      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ}
+      - WUD_WATCHER_LOCAL_HOST=tcp://socket-proxy:2375
+      - WUD_AUTH_BASIC_USER1_USER=admin
+      - WUD_AUTH_BASIC_USER1_HASH__FILE=/run/secrets/wud_auth_hash
     labels:
       traefik.enable: true
       traefik.http.routers.wud-rtr.entrypoints: https
       traefik.http.routers.wud-rtr.rule: Host(`wud.${DOMAINNAME}`)
       traefik.http.routers.wud-rtr.service: wud-svc
       traefik.http.services.wud-svc.loadbalancer.server.port: 3000
-      traefik.http.routers.wud-rtr.middlewares: authelia@file
+      # traefik.http.routers.wud-rtr.middlewares: chain-internal@file

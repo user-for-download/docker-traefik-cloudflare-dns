@@ -21,4 +21,4 @@ services:
       traefik.http.routers.dozz-rtr.rule: Host(`dozz.${DOMAINNAME}`)
       traefik.http.routers.dozz-rtr.service: dozz-svc
       traefik.http.services.dozz-svc.loadbalancer.server.port: 8080
-      traefik.http.routers.dozz-rtr.middlewares: authelia@file
+      # traefik.http.routers.dozz-rtr.middlewares: authelia@file

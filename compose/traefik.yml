@@ -2,40 +2,31 @@ services:
   traefik:
     container_name: traefik
     image: traefik
-    security_opt:
-      - no-new-privileges:true
-    user: "1000:1000"
     restart: always
     profiles: ["core", "all"]
+    security_opt: [no-new-privileges:true]
     networks:
-      net_t2: 
+      net_t2:
         ipv4_address: 172.16.90.254
-      socket_proxy: 
+      socket_proxy:
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      # This file needs write permissions for the user specified above.
-      - "${APPDIR}/traefik/acme/acme.json:/acme.json"
-      # This directory needs write permissions for the user specified above.
-      - "${DOCKERDIR}/logs/traefik:/logs"
-      # Configuration is correctly mounted as read-only.
-      - "${APPDIR}/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
-      - "${APPDIR}/traefik/rules:/etc/traefik/rules:ro"
     environment:
       - TZ=${TZ}
-      # This is the best practice for handling the API token.
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
-      - DOMAINNAME_CLOUD_SERVER=${DOMAINNAME_CLOUD_SERVER}
+      - DOMAINNAME=${DOMAINNAME}
     secrets:
       - cf_dns_api_token
       - htpasswd
-      - crowdsec_api_key 
-    depends_on:
-      - socket-proxy 
+      - crowdsec_api_key
+    volumes:
+      - ${APPDIR}/traefik/traefik.yml:/traefik.yml:ro
+      - ${APPDIR}/traefik/rules:/etc/traefik/rules:ro
+      - ${APPDIR}/traefik/acme.json:/acme.json
+      - ${LOGDIR}/traefik:/logs
     healthcheck:
       test: ["CMD", "traefik", "healthcheck", "--ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
+      interval: 30s
+      timeout: 10s
+      retries: 3

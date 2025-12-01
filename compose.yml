@@ -1,4 +1,4 @@
-name: tr-dns
+name: dfs
 
 networks:
   net_t2:
@@ -17,50 +17,68 @@ networks:
 secrets:
   # Traefik
   htpasswd:
-    file: $DOCKERDIR/secrets/htpasswd
+    file: ${DOCKERDIR}/secrets/htpasswd
   cf_dns_api_token:
-    file: $DOCKERDIR/secrets/cf/cf_dns_api_token
+    file: ${DOCKERDIR}/secrets/cf/cf_dns_api_token
   crowdsec_api_key:
-    file: $DOCKERDIR/secrets/crowdsec_api_key
+    file: ${DOCKERDIR}/secrets/crowdsec_api_key
+  
   # Authelia
   authelia_jwt_secret:
-    file: $DOCKERDIR/secrets/authelia/jwt_secret
+    file: ${DOCKERDIR}/secrets/authelia/jwt_secret
   authelia_session_secret:
-    file: $DOCKERDIR/secrets/authelia/session_secret
+    file: ${DOCKERDIR}/secrets/authelia/session_secret
   authelia_storage_mysql_password:
-    file: $DOCKERDIR/secrets/authelia/storage_mysql_password
+    file: ${DOCKERDIR}/secrets/authelia/storage_mysql_password
   authelia_storage_encryption_key:
-    file: $DOCKERDIR/secrets/authelia/storage_encryption_key
+    file: ${DOCKERDIR}/secrets/authelia/storage_encryption_key
+  
   # Database
   mysql_root_password:
-    file: $DOCKERDIR/secrets/db/mysql_root_password
+    file: ${DOCKERDIR}/secrets/db/mysql_root_password
+  
   # Vaultwarden
   vaultwarden_admin_token:
-    file: $DOCKERDIR/secrets/vl/vaultwarden_admin_token
+    file: ${DOCKERDIR}/secrets/vl/vaultwarden_admin_token
+  # wud
+  wud_auth_hash:
+    file: ${DOCKERDIR}/secrets/wud_auth_hash
 
+  # influxdb
+  influxdb_password:
+    file: ${DOCKERDIR}/secrets/influxdb_password
+    
+  # telegraf
+  telegraf_influx_token:
+    file: ${DOCKERDIR}/secrets/telegraf/influx_token
+    
 include:
   # Core
   - compose/traefik.yml
   - compose/socket-proxy.yml
   - compose/portainer.yml
+  
   # Database
   - compose/mariadb.yml
   - compose/redis.yml
   - compose/influxdb.yml
+
   # Monitoring
   - compose/uptime-kuma.yml
+  - compose/telegraf.yml
+
   # Auth
   - compose/authelia.yml
+  
   # Apps
   - compose/vaultwarden.yml
-  - compose/dozzle.yml
+  # - compose/dozzle.yml
   - compose/whats-up-docker.yml
+  
   # Adguard
   - compose/traefik-certs-dumper.yml
   - compose/adguard.yml
-  # Crowdsec
-  - compose/crowdsec.yml
-
+  
 volumes:
   portainer_data: {}
   kuma-data: {}
@@ -69,5 +87,5 @@ volumes:
   redis_data: {}
   mariadb_data: {}
   vaultwarden: {}
-  adguard: {}
+  # adguard: {}
   whats-up-docker: {}

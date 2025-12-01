@@ -1,19 +1,24 @@
 http:
   routers:
-    dashboard:
-      rule: Host(`traefik.binetc.store`)
-      service: "api@internal" 
+    traefik-rtr:
+      rule: 'Host(`traefik.{{env "DOMAINNAME"}}`)'
+      service: api@internal
       entryPoints:
-        - "https"
-      tls:
-        certResolver: "dns-cloudflare"
+        - https
       middlewares:
-        - "dashboard-auth"
-        - "local-ip"
-
-  middlewares:
-    dashboard-auth:
-      basicAuth:
-        users:
-        # echo $(htpasswd -nb admin your-secure-password) > ./secrets/htpasswd
-          - "admin:123123" 
+        - chain-internal@file
+        - basic-auth@file
+        # before run authelia
+        # - chain-internal-authelia@file
+      tls:
+        certResolver: dns-cloudflare
+    
+    # traefik-ping-rtr:
+    #   rule: 'Host(`traefik.{{env "DOMAINNAME"}}`) && Path(`/ping`)'
+    #   service: ping@internal
+    #   entryPoints:
+    #     - https
+    #   middlewares:
+    #     - local-ip@file
+    #   tls:
+    #     certResolver: dns-cloudflare

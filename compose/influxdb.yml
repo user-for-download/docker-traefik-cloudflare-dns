@@ -1,21 +1,31 @@
 services:
-  # InfluxDB - Database for sensor data
   influxdb:
-    image: influxdb
     container_name: influxdb
+    image: influxdb:2-alpine
     security_opt: [no-new-privileges:true]
     restart: unless-stopped
-    profiles: ["db", "all"]
+    profiles: ["database", "all"]
     networks: [net_t2, net_db]
-    expose:
-      - 8086
+    secrets:
+      - influxdb_password
     volumes:
-      - $DOCKERDIR/appdata/influxdb2/config:/etc/influxdb2
       - influxdb_data:/var/lib/influxdb2
+    environment:
+      - TZ=${TZ}
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD_FILE=/run/secrets/influxdb_password
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
     labels:
       traefik.enable: true
-      traefik.http.routers.influxdb-rtr.entrypoints: https
-      traefik.http.routers.influxdb-rtr.rule: Host(`inf.${DOMAINNAME}`)
-      traefik.http.routers.influxdb-rtr.service: influxdb-svc
-      traefik.http.services.influxdb-svc.loadbalancer.server.port: 8086
-      #traefik.http.routers.influxdb-rtr.middlewares: authelia@file
+      traefik.http.routers.influx-rtr.entrypoints: https
+      traefik.http.routers.influx-rtr.rule: Host(`influx.${DOMAINNAME}`)
+      traefik.http.routers.influx-rtr.service: influx-svc
+      traefik.http.services.influx-svc.loadbalancer.server.port: 8086
+      # traefik.http.routers.influx-rtr.middlewares: chain-internal@file
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

@@ -1,36 +1,38 @@
 services:
   authelia:
     container_name: authelia
-    image: authelia/authelia
+    image: authelia/authelia:latest
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    restart: always
+    profiles: ["auth", "all"]
+    networks: [net_t2, net_db, net_redis]
     volumes:
-      - $APPDIR/authelia:/config:ro
       - authelia_data:/data
-      - $DOCKERDIR/logs/authelia:/logs
+      - ${APPDIR}/authelia/configuration.yml:/config/configuration.yml:ro
+      - ${APPDIR}/authelia/users.yml:/config/users.yml:ro
+      - ${LOGDIR}/authelia/notification.txt:/data/notification.txt
+      - ${LOGDIR}/authelia:/logs
+    environment:
+      - TZ=${TZ}
+      - AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE=/run/secrets/authelia_jwt_secret
+      - AUTHELIA_SESSION_SECRET_FILE=/run/secrets/authelia_session_secret
+      - AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE=/run/secrets/authelia_storage_mysql_password
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/run/secrets/authelia_storage_encryption_key
     secrets:
       - authelia_jwt_secret
       - authelia_session_secret
       - authelia_storage_mysql_password
       - authelia_storage_encryption_key
-    environment:
-      TZ: $TZ
-      AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: /run/secrets/authelia_jwt_secret
-      AUTHELIA_SESSION_SECRET_FILE: /run/secrets/authelia_session_secret
-      AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE: /run/secrets/authelia_storage_mysql_password
-      AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/authelia_storage_encryption_key
-    networks:
-      - net_t2 
-      - net_redis 
-      - net_db
-    security_opt:
-      - no-new-privileges:true
-    profiles:
-      - auth
-      - all
-    restart: unless-stopped
     labels:
       traefik.enable: true
       traefik.http.routers.authelia-rtr.entrypoints: https
       traefik.http.routers.authelia-rtr.rule: Host(`auth.${DOMAINNAME}`)
       traefik.http.routers.authelia-rtr.service: authelia-svc
-      traefik.http.routers.authelia-rtr.middlewares: authelia@file
       traefik.http.services.authelia-svc.loadbalancer.server.port: 9091
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:9091/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

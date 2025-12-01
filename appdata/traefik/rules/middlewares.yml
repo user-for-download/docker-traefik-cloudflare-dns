@@ -1,4 +1,7 @@
 http:
+  serversTransports:
+    skipverify:
+      insecureSkipVerify: true
   middlewares:
     basic-auth:
       basicAuth:
@@ -6,53 +9,120 @@ http:
         realm: Traefik 2 Basic Auth
     authelia:
       forwardAuth:
-        address: >-
-          http://authelia:9091/api/verify?rd=https://auth.{{env
-          "DOMAINNAME_CLOUD_SERVER"}}
+        address: 'http://authelia:9091/api/authz/forward-auth'
         trustForwardHeader: true
         authResponseHeaders:
           - Remote-User
           - Remote-Groups
+          - Remote-Email
+          - Remote-Name
     rate-limit:
       rateLimit:
         average: 200
         burst: 100
+        period: 1s
+    rate-limit-strict:
+      rateLimit:
+        average: 50
+        burst: 20
+        period: 1s
     local-ip:
       ipAllowList:
         sourceRange:
           - 127.0.0.1/32
           - 10.0.0.0/8
-          - 192.168.0.0/16
           - 172.16.0.0/12
-    crowdsec-bouncer:
+          - 192.168.0.0/16
+    cloudflare-ip:
+      ipAllowList:
+        sourceRange:
+          - 173.245.48.0/20
+          - 103.21.244.0/22
+          - 103.22.200.0/22
+          - 103.31.4.0/22
+          - 141.101.64.0/18
+          - 108.162.192.0/18
+          - 190.93.240.0/20
+          - 188.114.96.0/20
+          - 197.234.240.0/22
+          - 198.41.128.0/17
+          - 162.158.0.0/15
+          - 104.16.0.0/13
+          - 104.24.0.0/14
+          - 172.64.0.0/13
+          - 131.0.72.0/22
+    crowdsec:
       plugin:
         crowdsec-bouncer-traefik-plugin:
-          CrowdsecLapiFile: /run/secrets/crowdsec_api_key
-          CrowdsecMode: ban
-          CrowdsecAppsecEnabled: false
-          CrowdsecAppsecHost: 'http://crowdsec:8080'
-          ClientTrustedIPs:
+          enabled: false
+          crowdsecLapiKeyFile: /run/secrets/crowdsec_api_key
+          crowdsecLapiHost: 'http://crowdsec:8080'
+          crowdsecMode: live
+          updateIntervalSeconds: 15
+          clientTrustedIPs:
             - 127.0.0.1/32
+            - 10.0.0.0/8
+            - 172.16.0.0/12
             - 192.168.0.0/16
-          Enabled: false
-    https-redirectscheme:
+    https-redirect:
       redirectScheme:
         scheme: https
         permanent: true
-
+    www-redirect:
+      redirectRegex:
+        regex: '^https://www\.(.*)'
+        replacement: 'https://${1}'
+        permanent: true
     secure-headers:
       headers:
         stsSeconds: 31536000
         stsIncludeSubdomains: true
-        stsPreload: false
+        stsPreload: true
         forceSTSHeader: true
         customFrameOptionsValue: SAMEORIGIN
         contentTypeNosniff: true
+        browserXssFilter: true
         referrerPolicy: strict-origin-when-cross-origin
-        permissionsPolicy: >-
-          camera=(), microphone=(), geolocation=(), payment=(), usb=(), sync-xhr=()
+        permissionsPolicy: >
+          camera=(), microphone=(), geolocation=(), payment=(), usb=(),
+          interest-cohort=()
         customResponseHeaders:
-          X-Robots-Tag: "noindex, nofollow, noarchive, nosnippet"
+          X-Robots-Tag: 'noindex, nofollow, nosnippet, noarchive'
+          X-Download-Options: noopen
+          X-Permitted-Cross-Domain-Policies: none
+          Server: ''
+        hostsProxyHeaders:
+          - X-Forwarded-Host
+    secure-headers-public:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        customFrameOptionsValue: SAMEORIGIN
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: strict-origin-when-cross-origin
+        permissionsPolicy: |
+          camera=(), microphone=(), geolocation=(), payment=(), usb=()
+        customResponseHeaders:
+          Server: ''
+        hostsProxyHeaders:
+          - X-Forwarded-Host
+    secure-headers-vaultwarden:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        contentTypeNosniff: true
+        permissionsPolicy: |
+          camera=(), microphone=(), geolocation=(), payment=(), usb=()
+        customResponseHeaders:
+          Server: ''
+          X-Robots-Tag: 'noindex, nofollow'
+          Referrer-Policy: same-origin
+          X-XSS-Protection: '0'
         hostsProxyHeaders:
           - X-Forwarded-Host
     nextcloud-redirect:
@@ -69,51 +139,71 @@ http:
         customFrameOptionsValue: SAMEORIGIN
         contentTypeNosniff: true
         referrerPolicy: strict-origin-when-cross-origin
-        permissionsPolicy: >-
+        permissionsPolicy: >
           camera=(), microphone=(), geolocation=(), payment=(), usb=(),
-          execution-while-out-of-focus=(), execution-while-not-rendered=(),
           sync-xhr=()
         customResponseHeaders:
           Server: ''
+          X-Robots-Tag: 'noindex, nofollow'
+        hostsProxyHeaders:
+          - X-Forwarded-Host
     compress:
       compress:
         minResponseBodyBytes: 1024
-    chain-no-auth:
+        excludedContentTypes:
+          - text/event-stream
+    chain-public:
       chain:
         middlewares:
           - rate-limit
-          - secure-headers
-          - https-redirectscheme
+          - secure-headers-public
+          - compress
+    chain-vaultwarden:
+      chain:
+        middlewares:
+          - rate-limit
+          - secure-headers-vaultwarden
           - compress
     chain-authelia:
       chain:
         middlewares:
           - rate-limit
-          - secure-headers
           - authelia
-          - https-redirectscheme
+          - secure-headers
+          - compress
+    chain-internal-authelia:
+      chain:
+        middlewares:
+          - local-ip
+          - rate-limit
+          - authelia
+          - secure-headers
+          - compress
+    chain-internal:
+      chain:
+        middlewares:
+          - local-ip
+          - rate-limit
+          - secure-headers
           - compress
     chain-nextcloud:
       chain:
         middlewares:
           - rate-limit
+          - nextcloud-redirect
           - nextcloud-headers
           - compress
-          - https-redirectscheme
-    chain-internal-authelia:
+    chain-api:
       chain:
         middlewares:
-          - rate-limit
-          - local-ip
+          - rate-limit-strict
           - authelia
-          - secure-headers
           - compress
-          - https-redirectscheme
-    chain-internal:
-          chain:
-            middlewares:
-              - rate-limit
-              - local-ip
-              - secure-headers
-              - compress
-              - https-redirectscheme
+tcp:
+  middlewares:
+    tcp-local:
+      ipAllowList:
+        sourceRange:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
