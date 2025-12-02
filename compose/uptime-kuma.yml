@@ -1,24 +1,33 @@
 services:
   uptime-kuma:
     container_name: uptime-kuma
-    image: louislam/uptime-kuma:2
-    security_opt: [no-new-privileges:true]
+    image: 'louislam/uptime-kuma:2'
+    security_opt:
+      - 'no-new-privileges:true'
     restart: unless-stopped
-    profiles: ["monitoring", "all"]
-    networks: [net_t2, socket_proxy]
+    profiles:
+      - monitoring
+      - all
+    networks:
+      - net_t2
+      - socket_proxy
     volumes:
-      - kuma-data:/app/data
+      - 'kuma-data:/app/data'
     environment:
-      - DOCKER_HOST=tcp://socket-proxy:2375
+      - 'DOCKER_HOST=tcp://socket-proxy:2375'
     labels:
       traefik.enable: true
       traefik.http.routers.kuma-rtr.entrypoints: https
-      traefik.http.routers.kuma-rtr.rule: Host(`status.${DOMAINNAME}`)
+      traefik.http.routers.kuma-rtr.rule: 'Host(`status.${DOMAINNAME}`)'
       traefik.http.routers.kuma-rtr.service: kuma-svc
+      traefik.http.routers.kuma-rtr.tls: true
       traefik.http.services.kuma-svc.loadbalancer.server.port: 3001
-      # traefik.http.routers.kuma-rtr.middlewares: chain-authelia@file
+      traefik.http.routers.kuma-rtr.middlewares: chain-authelia@file
     healthcheck:
-      test: ["CMD", "node", "extra/healthcheck.js"]
+      test:
+        - CMD
+        - node
+        - extra/healthcheck.js
       interval: 60s
       timeout: 10s
       retries: 3

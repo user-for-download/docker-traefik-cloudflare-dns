@@ -28,7 +28,7 @@ ntp:
 log:
   level: warn
   format: json
-  file_path: /logs/authelia.%d.log
+  file_path: /logs/authelia.%d.json
   keep_stdout: false
 
 totp:

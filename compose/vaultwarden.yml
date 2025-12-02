@@ -2,10 +2,14 @@ services:
   vaultwarden:
     container_name: vaultwarden
     image: vaultwarden/server:latest
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     restart: always
-    profiles: ["apps", "all"]
-    networks: [net_t2]
+    profiles:
+      - apps
+      - all
+    networks:
+      - net_t2
     volumes:
       - vaultwarden:/data
     environment:
@@ -20,19 +24,20 @@ services:
       - vaultwarden_admin_token
     labels:
       traefik.enable: true
-      # Main router
       traefik.http.routers.vault-rtr.entrypoints: https
       traefik.http.routers.vault-rtr.rule: Host(`vault.${DOMAINNAME}`)
       traefik.http.routers.vault-rtr.middlewares: chain-vaultwarden@file
       traefik.http.routers.vault-rtr.service: vault-svc
       traefik.http.services.vault-svc.loadbalancer.server.port: 80
-      # Admin
       traefik.http.routers.vault-admin-rtr.entrypoints: https
       traefik.http.routers.vault-admin-rtr.rule: Host(`vault.${DOMAINNAME}`) && PathPrefix(`/admin`)
-      # traefik.http.routers.vault-admin-rtr.middlewares: chain-vaultwarden@file,authelia@file
       traefik.http.routers.vault-admin-rtr.service: vault-svc
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/alive"]
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - http://localhost:80/alive
       interval: 30s
       timeout: 5s
       retries: 3

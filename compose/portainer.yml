@@ -2,13 +2,18 @@ services:
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
-    profiles: ["core", "all"]
-    networks: [net_t2, socket_proxy]
+    profiles:
+      - core
+      - all
+    networks:
+      - net_t2
+      - socket_proxy
     environment:
       - TZ=${TZ}
-    command: -H tcp://socket-proxy:2375
+    command: '-H tcp://socket-proxy:2375'
     volumes:
       - portainer_data:/data
     labels:
@@ -16,5 +21,6 @@ services:
       traefik.http.routers.portainer-rtr.entrypoints: https
       traefik.http.routers.portainer-rtr.rule: Host(`portainer.${DOMAINNAME}`)
       traefik.http.routers.portainer-rtr.service: portainer-svc
+      traefik.http.routers.portainer-rtr.tls: true
       traefik.http.services.portainer-svc.loadbalancer.server.port: 9000
-      # traefik.http.routers.portainer-rtr.middlewares: chain-internal@file
+      traefik.http.routers.portainer-rtr.middlewares: chain-internal@file

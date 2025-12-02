@@ -2,17 +2,24 @@ services:
   telegraf:
     container_name: telegraf
     image: telegraf:alpine
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
-    profiles: [monitoring, all]
-    networks: [net_db, socket_proxy]
+    profiles:
+      - monitoring
+      - all
+    networks:
+      - net_db
+      - socket_proxy
     environment:
       - TZ=${TZ}
       - INFLUX_HOST=http://influxdb:8086
       - INFLUX_ORG=${INFLUXDB_ORG}
     secrets:
       - telegraf_influx_token
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint:
+      - /bin/sh
+      - '-c'
     command:
       - |
         export INFLUX_TOKEN=$$(cat /run/secrets/telegraf_influx_token)
@@ -20,7 +27,10 @@ services:
     volumes:
       - ${APPDIR}/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     healthcheck:
-      test: ["CMD", "telegraf", "--test"]
+      test:
+        - CMD
+        - telegraf
+        - '--test'
       interval: 60s
       timeout: 10s
       retries: 3

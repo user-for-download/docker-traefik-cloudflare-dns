@@ -26,11 +26,15 @@ api:
   dashboard: true
   insecure: false
 log:
-  filePath: /logs/traefik.log
+  filePath: /logs/traefik.json
   format: json
   level: INFO
+  maxSize: 50
+  maxAge: 14
+  maxBackups: 5
+  compress: true
 accessLog:
-  filePath: /logs/access.log
+  filePath: /logs/access.json
   format: json
   bufferingSize: 100
   filters:

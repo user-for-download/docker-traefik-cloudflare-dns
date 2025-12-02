@@ -2,28 +2,32 @@ services:
   adguard:
     container_name: adguard
     image: adguard/adguardhome:latest
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     restart: always
-    profiles: ["adguard", "all"]
+    profiles:
+      - adguard
+      - all
     networks:
-      net_t2:
-        ipv4_address: 172.16.90.253
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      # - "67:67/udp"   # DHCP (if needed)
-      # - "853:853/tcp" # DNS-over-TLS
+      net_t2: null
     volumes:
       - adguard:/opt/adguardhome/work
       - ${APPDIR}/adguard/conf:/opt/adguardhome/conf
-      # Certificates from traefik-certs-dumper
-      - ${CERTDIR}/shared/certs/${DOMAINNAME}:/certs:ro
+      - ${DOCKERDIR}/certs:/certs:ro
     environment:
       - TZ=${TZ}
     labels:
       traefik.enable: true
+      traefik.http.routers.adguard-doh-rtr.entrypoints: https
+      traefik.http.routers.adguard-doh-rtr.rule: Host(`adguard.${DOMAINNAME}`) && Path(`/dns-query`)
+      traefik.http.routers.adguard-doh-rtr.priority: 100
+      traefik.http.routers.adguard-doh-rtr.tls: true
+      traefik.http.routers.adguard-doh-rtr.service: adguard-svc
+      traefik.http.routers.adguard-doh-rtr.middlewares: chain-public@file
       traefik.http.routers.adguard-rtr.entrypoints: https
       traefik.http.routers.adguard-rtr.rule: Host(`adguard.${DOMAINNAME}`)
+      traefik.http.routers.adguard-rtr.priority: 50
+      traefik.http.routers.adguard-rtr.tls: true
       traefik.http.routers.adguard-rtr.service: adguard-svc
-      traefik.http.services.adguard-svc.loadbalancer.server.port: 80
-      # traefik.http.routers.adguard-rtr.middlewares: authelia@file
+      traefik.http.routers.adguard-rtr.middlewares: chain-internal-adm@file
+      traefik.http.services.adguard-svc.loadbalancer.server.port: 3000

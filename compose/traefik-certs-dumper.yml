@@ -2,10 +2,13 @@ services:
   traefik-certs-dumper:
     container_name: traefik-certs-dumper
     image: ldez/traefik-certs-dumper:latest
-    security_opt: [no-new-privileges:true]
-    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+    user: '1000:1000'
     restart: unless-stopped
-    profiles: ["adguard", "all"]
+    profiles:
+      - adguard
+      - all
     networks: []
     volumes:
       - ${APPDIR}/traefik/acme.json:/acme.json:ro

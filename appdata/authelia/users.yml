@@ -3,10 +3,9 @@
 ###############################################################
 # List of users
 users:
-  addmin:
+  admin:
     displayname: userAdmin
-    password: "$argon2id$v=19$m=65536,t=3,p=4$SDL9p/NJBuXMgBjJloUxUw$G8iVgeczlVSNRPfjoTyNyk2nEvBT+Zs5E1WVVZW/R/A"
-    #password: "d59e64cc9e8d4b711a3b4edaaba650e6"
+    password: "$argon2id$v=19$m=65536,t=3,p================"
     email: userAdmin@site.com
     groups:
       - dev

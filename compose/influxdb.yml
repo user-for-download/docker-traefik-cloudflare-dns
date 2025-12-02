@@ -2,10 +2,15 @@ services:
   influxdb:
     container_name: influxdb
     image: influxdb:2-alpine
-    security_opt: [no-new-privileges:true]
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
-    profiles: ["database", "all"]
-    networks: [net_t2, net_db]
+    profiles:
+      - database
+      - all
+    networks:
+      - net_t2
+      - net_db
     secrets:
       - influxdb_password
     volumes:
@@ -22,10 +27,14 @@ services:
       traefik.http.routers.influx-rtr.entrypoints: https
       traefik.http.routers.influx-rtr.rule: Host(`influx.${DOMAINNAME}`)
       traefik.http.routers.influx-rtr.service: influx-svc
+      traefik.http.routers.influx-rtr.tls: true
       traefik.http.services.influx-svc.loadbalancer.server.port: 8086
-      # traefik.http.routers.influx-rtr.middlewares: chain-internal@file
+      traefik.http.routers.influx-rtr.middlewares: chain-internal@file
     healthcheck:
-      test: ["CMD", "influx", "ping"]
+      test:
+        - CMD
+        - influx
+        - ping
       interval: 30s
       timeout: 5s
       retries: 3

@@ -3,15 +3,17 @@ services:
     container_name: traefik
     image: traefik
     restart: always
-    profiles: ["core", "all"]
-    security_opt: [no-new-privileges:true]
+    profiles:
+      - core
+      - all
+    security_opt:
+      - no-new-privileges:true
     networks:
-      net_t2:
-        ipv4_address: 172.16.90.254
-      socket_proxy:
+      net_t2: null
+      socket_proxy: null
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     environment:
       - TZ=${TZ}
       - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
@@ -25,8 +27,13 @@ services:
       - ${APPDIR}/traefik/rules:/etc/traefik/rules:ro
       - ${APPDIR}/traefik/acme.json:/acme.json
       - ${LOGDIR}/traefik:/logs
+      - ${DOCKERDIR}/certs:/etc/traefik/certs:ro
     healthcheck:
-      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      test:
+        - CMD
+        - traefik
+        - healthcheck
+        - '--ping'
       interval: 30s
       timeout: 10s
       retries: 3

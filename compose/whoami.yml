@@ -2,16 +2,19 @@ services:
   whoami:
     image: containous/whoami
     container_name: whoami
-    networks: [net_t2]
-    security_opt: [no-new-privileges:true]
+    networks:
+      - net_t2
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
-    profiles: ["test", "all"]
+    profiles:
+      - test
+      - all
     command:
-      - --port=8082
+      - '--port=8082'
     labels:
       traefik.enable: true
       traefik.http.routers.whoami-rtr.entrypoints: https
       traefik.http.routers.whoami-rtr.rule: Host(`whoami.${DOMAINNAME}`)
       traefik.http.routers.whoami-rtr.service: whoami-svc
       traefik.http.services.whoami-svc.loadbalancer.server.port: 8082
-      #traefik.http.routers.whoami-rtr.middlewares: authelia@file

@@ -1,4 +1,4 @@
-name: dfs
+name: dts
 
 networks:
   net_t2:
@@ -71,13 +71,13 @@ include:
   - compose/authelia.yml
   
   # Apps
-  - compose/vaultwarden.yml
+  # - compose/vaultwarden.yml
   # - compose/dozzle.yml
   - compose/whats-up-docker.yml
   
   # Adguard
-  - compose/traefik-certs-dumper.yml
-  - compose/adguard.yml
+  # - compose/traefik-certs-dumper.yml
+  # - compose/adguard.yml
   
 volumes:
   portainer_data: {}
@@ -87,5 +87,5 @@ volumes:
   redis_data: {}
   mariadb_data: {}
   vaultwarden: {}
-  # adguard: {}
+  adguard: {}
   whats-up-docker: {}
