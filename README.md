@@ -57,7 +57,7 @@ docker-traefik-cloudflare-dns/
 ### 1. Clone and Initialize
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/user-for-download/docker-traefik-cloudflare-dns
 cd docker-traefik-cloudflare-dns
 chmod +x init.sh
 ./init.sh
