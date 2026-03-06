@@ -1,0 +1,50 @@
+services:
+  vaultwarden:
+    container_name: vaultwarden
+    image: vaultwarden/server:latest
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    profiles:
+      - apps
+      - all
+    networks:
+      - net_t2
+    volumes:
+      - vaultwarden:/data
+    environment:
+      - TZ=${TZ}
+      - DOMAIN=https://vault.${DOMAINNAME}
+      - SIGNUPS_ALLOWED=false
+      - INVITATIONS_ALLOWED=true
+      - SHOW_PASSWORD_HINT=false
+      - ADMIN_TOKEN_FILE=/run/secrets/vaultwarden_admin_token
+      - LOG_LEVEL=warn
+    secrets:
+      - vaultwarden_admin_token
+    labels:
+      traefik.enable: true
+      # Main vault router
+      traefik.http.routers.vault-rtr.entrypoints: https
+      traefik.http.routers.vault-rtr.rule: Host(`vault.${DOMAINNAME}`)
+      traefik.http.routers.vault-rtr.tls: true
+      traefik.http.routers.vault-rtr.middlewares: chain-vaultwarden@file
+      traefik.http.routers.vault-rtr.service: vault-svc
+      traefik.http.services.vault-svc.loadbalancer.server.port: 80
+      # Admin panel - restricted to local + authelia
+      traefik.http.routers.vault-admin-rtr.entrypoints: https
+      traefik.http.routers.vault-admin-rtr.rule: Host(`vault.${DOMAINNAME}`) && PathPrefix(`/admin`)
+      traefik.http.routers.vault-admin-rtr.tls: true
+      traefik.http.routers.vault-admin-rtr.priority: 100
+      traefik.http.routers.vault-admin-rtr.service: vault-svc
+      traefik.http.routers.vault-admin-rtr.middlewares: chain-internal@file
+      # traefik.http.routers.vault-admin-rtr.middlewares: chain-internal-authelia@file
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - http://localhost:80/alive
+      interval: 30s
+      timeout: 5s
+      retries: 3

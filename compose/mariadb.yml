@@ -1,0 +1,30 @@
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:lts
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    profiles:
+      - database
+      - all
+    networks:
+      - net_db
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - TZ=${TZ}
+      - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MARIADB_AUTO_UPGRADE=1
+    secrets:
+      - mysql_root_password
+    healthcheck:
+      test:
+        - CMD
+        - healthcheck.sh
+        - '--connect'
+        - '--innodb_initialized'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

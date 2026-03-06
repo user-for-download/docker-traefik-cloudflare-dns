@@ -1,0 +1,31 @@
+services:
+  whats-up-docker:
+    container_name: whats-up-docker
+    image: getwud/wud
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    profiles:
+      - apps
+      - all
+    networks:
+      - net_t2
+      - socket_proxy
+    secrets:
+      - wud_auth_hash
+    volumes:
+      - whats-up-docker:/store
+    environment:
+      - TZ=${TZ}
+      - WUD_WATCHER_LOCAL_HOST=tcp://socket-proxy:2375
+      - WUD_AUTH_BASIC_USER1_USER=admin
+      - WUD_AUTH_BASIC_USER1_HASH__FILE=/run/secrets/wud_auth_hash
+    labels:
+      traefik.enable: true
+      traefik.http.routers.wud-rtr.entrypoints: https
+      traefik.http.routers.wud-rtr.rule: Host(`wud.${DOMAINNAME}`)
+      traefik.http.routers.wud-rtr.tls: true
+      traefik.http.routers.wud-rtr.service: wud-svc
+      traefik.http.services.wud-svc.loadbalancer.server.port: 3000
+      # traefik.http.routers.wud-rtr.middlewares: chain-internal-authelia@file
+      traefik.http.routers.wud-rtr.middlewares: chain-internal@file

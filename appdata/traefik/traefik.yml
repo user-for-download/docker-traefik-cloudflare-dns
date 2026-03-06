@@ -1,0 +1,120 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+ping:
+  entryPoint: ping
+
+entryPoints:
+  http:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: https
+          scheme: https
+  https:
+    address: ':443'
+    http:
+      tls:
+        certResolver: dns-cloudflare
+        domains:
+          - main: '{{env "DOMAINNAME"}}'
+            sans:
+              - '*.{{env "DOMAINNAME"}}'
+  ping:
+    address: ':8082'
+
+api:
+  dashboard: true
+  insecure: false
+
+log:
+  filePath: /logs/traefik.json
+  format: json
+  level: INFO
+  maxSize: 50
+  maxAge: 14
+  maxBackups: 5
+  compress: true
+
+accessLog:
+  filePath: /logs/access.json
+  format: json
+  bufferingSize: 100
+  filters:
+    retryAttempts: true
+    statusCodes:
+      - 200-599
+  fields:
+    names:
+      StartUTC: drop
+
+# comment all <certificatesResolvers> if use local cert 
+certificatesResolvers:
+  dns-cloudflare:
+    acme:
+      # IMPORTANT: Switch to production after testing!
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      # caServer: 'https://acme-v02.api.letsencrypt.org/directory'
+      email: '---dns@mail.com---'
+      storage: /acme.json
+      dnsChallenge:
+        provider: cloudflare
+        propagation:
+          delayBeforeChecks: 90s
+        resolvers:
+          - '1.1.1.1:53'
+          - '1.0.0.1:53'
+
+# Uncomment after creating InfluxDB traefik bucket and token.
+# metrics:
+#   influxDB2:
+#     addEntryPointsLabels: true
+#     addServicesLabels: true
+#     addRoutersLabels: true
+#     address: 'http://influxdb:8086'
+#     bucket: traefik
+#     org: myorg
+#     pushInterval: 30s
+#     token: 'EljG6MpyrRq5lAx0YkNZ3S-fX-Wx6gof7UKAB5j51JM7V9k1UBov6S_K0o0Vzo26dTO1nl3GY3W9QP6c_REg=='
+#     additionalLabels:
+#       environment: production
+#       host: '{{env "DOMAINNAME"}}'
+
+providers:
+  docker:
+    endpoint: 'tcp://socket-proxy:2375'
+    exposedByDefault: false
+    network: net_t2
+  file:
+    directory: /etc/traefik/rules
+    watch: true
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+        - CurveP256
+      sniStrict: true
+    mintls13:
+      minVersion: VersionTLS13
+      cipherSuites:
+        - TLS_AES_128_GCM_SHA256
+        - TLS_AES_256_GCM_SHA384
+        - TLS_CHACHA20_POLY1305_SHA256
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+        - CurveP256
+      sniStrict: true

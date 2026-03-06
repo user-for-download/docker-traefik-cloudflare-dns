@@ -1,0 +1,112 @@
+###############################################################################
+#                           Authelia Configuration                            #
+###############################################################################
+theme: dark
+
+server:
+  address: "tcp://0.0.0.0:9091"
+  disable_healthcheck: false
+  endpoints:
+    enable_pprof: false
+    enable_expvars: false
+  buffers:
+    read: 4096
+    write: 4096
+  timeouts:
+    read: 6s
+    write: 6s
+    idle: 30s
+
+ntp:
+  address: 'udp://time.cloudflare.com:123'
+  version: 3
+  max_desync: '3s'
+  disable_startup_check: false
+  disable_failure: false
+
+log:
+  level: warn
+  format: json
+  file_path: /logs/authelia.%d.json
+  keep_stdout: false
+
+totp:
+  issuer: auth.<SITE.COM>
+  period: 30
+  skew: 1
+
+authentication_backend:
+  password_reset:
+    disable: true
+  refresh_interval: 5m
+  file:
+    path: /config/users.yml
+    password:
+      algorithm: argon2id
+      iterations: 1
+      key_length: 32
+      salt_length: 16
+      memory: 1024
+      parallelism: 8
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: auth.<SITE.COM>
+      policy: bypass
+    - domain: "*.<SITE.COM>"
+      policy: one_factor
+
+session:
+  cookies:
+    - domain: "<SITE.COM>"
+      authelia_url: "https://auth.<SITE.COM>"
+      default_redirection_url: "https://traefik.<SITE.COM>"
+      name: "authelia_session"
+      same_site: "lax"
+      inactivity: "5m"
+      expiration: "1h"
+      remember_me: "1d"
+  redis:
+    host: redis
+    port: 6379
+    database_index: 0
+    maximum_active_connections: 10
+    minimum_idle_connections: 0
+
+regulation:
+  max_retries: 3
+  find_time: 10m
+  ban_time: 12h
+
+storage:
+  mysql:
+    address: "tcp://mariadb:3306"
+    database: "authelia"
+    username: "authelia"
+    timeout: "5s"
+
+notifier:
+  disable_startup_check: true
+  filesystem:
+    filename: /data/notification.txt
+  # TODO: Replace filesystem notifier with SMTP for production
+  # smtp:
+  #   username: YOUR@EMAIL.HERE
+  #   password: "YOUR_EMAIL_PASSWORD"
+  #   host: YOUR_SMTP_HOST
+  #   port: 587
+  #   sender: YOUR@EMAIL.HERE
+  #   identifier: localhost
+  #   subject: "[Authelia] {title}"
+  #   startup_check_address: test@authelia.com
+  #   disable_require_tls: false
+  #   disable_html_emails: false
+  #   tls:
+  #     skip_verify: false
+  #     minimum_version: TLS1.2
+
+identity_validation:
+  reset_password:
+    jwt_lifespan: 5m
+    jwt_algorithm: HS256

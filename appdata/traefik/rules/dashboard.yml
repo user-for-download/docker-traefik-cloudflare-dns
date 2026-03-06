@@ -1,0 +1,14 @@
+http:
+  routers:
+    traefik-rtr:
+      rule: 'Host(`traefik.{{env "DOMAINNAME"}}`)'
+      service: api@internal
+      entryPoints:
+        - https
+      middlewares:
+        # - chain-internal-authelia@file
+        - chain-internal@file
+      tls:
+        certResolver: dns-cloudflare
+      # if use local cert 
+      # tls: {}

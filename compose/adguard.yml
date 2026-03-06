@@ -1,0 +1,36 @@
+services:
+  adguard:
+    container_name: adguard
+    image: adguard/adguardhome:latest
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    profiles:
+      - adguard
+      - all
+    networks:
+      net_t2: null
+    volumes:
+      - adguard:/opt/adguardhome/work
+      - ${APPDIR}/adguard/conf:/opt/adguardhome/conf
+      - ${DOCKERDIR}/certs:/certs:ro
+    environment:
+      - TZ=${TZ}
+    labels:
+      traefik.enable: true
+      # DoH endpoint - public access
+      traefik.http.routers.adguard-doh-rtr.entrypoints: https
+      traefik.http.routers.adguard-doh-rtr.rule: Host(`adguard.${DOMAINNAME}`) && Path(`/dns-query`)
+      traefik.http.routers.adguard-doh-rtr.priority: 100
+      traefik.http.routers.adguard-doh-rtr.tls: true
+      traefik.http.routers.adguard-doh-rtr.service: adguard-svc
+      traefik.http.routers.adguard-doh-rtr.middlewares: chain-public@file
+      # Admin panel - restricted
+      traefik.http.routers.adguard-rtr.entrypoints: https
+      traefik.http.routers.adguard-rtr.rule: Host(`adguard.${DOMAINNAME}`)
+      traefik.http.routers.adguard-rtr.priority: 50
+      traefik.http.routers.adguard-rtr.tls: true
+      traefik.http.routers.adguard-rtr.service: adguard-svc
+      # traefik.http.routers.adguard-rtr.middlewares: chain-internal-authelia@file
+      traefik.http.routers.adguard-rtr.middlewares: chain-internal@file
+      traefik.http.services.adguard-svc.loadbalancer.server.port: 3000

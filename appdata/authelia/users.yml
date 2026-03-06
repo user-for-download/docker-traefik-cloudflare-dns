@@ -1,0 +1,12 @@
+###############################################################
+#                         Users Database                      #
+###############################################################
+# List of users
+users:
+  admin:
+    displayname: userAdmin
+    # 12345678
+    password: "$argon2id$v=19$m=19456,t=2,p=1$6X8Ccn3p5E4B6lYAXI9Cw7pntT2J1UbipWshUmoj05c$L1jxKDZMpsM2xDZzysrX34JCm11IndpPxRHSHNPb5Oc"
+    email: userAdmin@site.com
+    groups:
+      - dev
