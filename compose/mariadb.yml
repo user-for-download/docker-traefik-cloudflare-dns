@@ -16,8 +16,12 @@ services:
       - TZ=${TZ}
       - MARIADB_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
       - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DATABASE=authelia
+      - MARIADB_USER=authelia
+      - MARIADB_PASSWORD_FILE=/run/secrets/authelia_storage_mysql_password
     secrets:
       - mysql_root_password
+      - authelia_storage_mysql_password
     healthcheck:
       test:
         - CMD

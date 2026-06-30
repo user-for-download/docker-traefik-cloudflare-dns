@@ -15,6 +15,7 @@ services:
       - TZ=${TZ}
       - INFLUX_HOST=http://influxdb:8086
       - INFLUX_ORG=${INFLUXDB_ORG}
+      - INFLUX_BUCKET=${INFLUXDB_BUCKET}
     secrets:
       - telegraf_influx_token
     entrypoint:

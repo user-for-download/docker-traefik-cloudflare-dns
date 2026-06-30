@@ -47,9 +47,3 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-
-networks:
-  socket_proxy_admin:
-    name: socket_proxy_admin
-    driver: bridge
-    internal: true

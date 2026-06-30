@@ -128,14 +128,15 @@ http:
         stsIncludeSubdomains: true
         stsPreload: true
         forceSTSHeader: true
+        customFrameOptionsValue: SAMEORIGIN
         contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: same-origin
         permissionsPolicy: >-
           camera=(), microphone=(), geolocation=(), payment=(), usb=()
         customResponseHeaders:
           Server: ''
           X-Robots-Tag: 'noindex, nofollow'
-          Referrer-Policy: same-origin
-          X-XSS-Protection: '0'
         hostsProxyHeaders:
           - X-Forwarded-Host
 

@@ -10,6 +10,9 @@ networks:
   net_db:
     name: net_db
     external: true
+  socket_proxy_admin:
+    name: socket_proxy_admin
+    external: true
   net_redis:
     name: net_redis
     external: true
@@ -18,8 +21,9 @@ secrets:
   # Traefik
   htpasswd:
     file: ${DOCKERDIR}/secrets/htpasswd
-  cf_dns_api_token:
-    file: ${DOCKERDIR}/secrets/cf/cf_dns_api_token
+  # CLOUDFLARE: uncomment for DNS challenge
+  # cf_dns_api_token:
+  #   file: ${DOCKERDIR}/secrets/cf/cf_dns_api_token
   crowdsec_api_key:
     file: ${DOCKERDIR}/secrets/crowdsec_api_key
 
@@ -48,10 +52,16 @@ secrets:
   # InfluxDB
   influxdb_password:
     file: ${DOCKERDIR}/secrets/influxdb_password
+  influxdb_admin_token:
+    file: ${DOCKERDIR}/secrets/influxdb_admin_token
 
   # Telegraf
   telegraf_influx_token:
     file: ${DOCKERDIR}/secrets/telegraf/influx_token
+
+  # Redis
+  redis_password:
+    file: ${DOCKERDIR}/secrets/redis_password
 
   # Traefik InfluxDB metrics token
   traefik_influx_token:

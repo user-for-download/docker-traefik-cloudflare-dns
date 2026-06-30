@@ -15,19 +15,14 @@ entryPoints:
           scheme: https
   https:
     address: ':443'
-    http:
-      tls:
-        certResolver: dns-cloudflare
-        domains:
-          - main: '{{env "DOMAINNAME"}}'
-            sans:
-              - '*.{{env "DOMAINNAME"}}'
   ping:
     address: ':8082'
 
 api:
   dashboard: true
-  insecure: false
+  # Insecure mode: dashboard on port 8080 without TLS
+  # Set to false in production and use a router instead
+  insecure: true
 
 log:
   filePath: /logs/traefik.json
@@ -50,37 +45,24 @@ accessLog:
     names:
       StartUTC: drop
 
-# comment all <certificatesResolvers> if use local cert 
-certificatesResolvers:
-  dns-cloudflare:
-    acme:
-      # IMPORTANT: Switch to production after testing!
-      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
-      # caServer: 'https://acme-v02.api.letsencrypt.org/directory'
-      email: '---dns@mail.com---'
-      storage: /acme.json
-      dnsChallenge:
-        provider: cloudflare
-        propagation:
-          delayBeforeChecks: 90s
-        resolvers:
-          - '1.1.1.1:53'
-          - '1.0.0.1:53'
-
-# Uncomment after creating InfluxDB traefik bucket and token.
-# metrics:
-#   influxDB2:
-#     addEntryPointsLabels: true
-#     addServicesLabels: true
-#     addRoutersLabels: true
-#     address: 'http://influxdb:8086'
-#     bucket: traefik
-#     org: myorg
-#     pushInterval: 30s
-#     token: 'EljG6MpyrRq5lAx0YkNZ3S-fX-Wx6gof7UKAB5j51JM7V9k1UBov6S_K0o0Vzo26dTO1nl3GY3W9QP6c_REg=='
-#     additionalLabels:
-#       environment: production
-#       host: '{{env "DOMAINNAME"}}'
+# ============================================
+# Certificate Resolvers (for Let's Encrypt / Cloudflare)
+# Uncomment when switching to Cloudflare DNS challenge
+# ============================================
+# certificatesResolvers:
+#   dns-cloudflare:
+#     acme:
+#       caServer: 'https://acme-v02.api.letsencrypt.org/directory'
+#       # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+#       email: '{{env "ACME_EMAIL"}}'
+#       storage: /acme.json
+#       dnsChallenge:
+#         provider: cloudflare
+#         propagation:
+#           delayBeforeChecks: 90s
+#         resolvers:
+#           - '1.1.1.1:53'
+#           - '1.0.0.1:53'
 
 providers:
   docker:
@@ -90,6 +72,21 @@ providers:
   file:
     directory: /etc/traefik/rules
     watch: true
+
+# Uncomment to enable InfluxDB metrics
+# metrics:
+#   influxDB2:
+#     addEntryPointsLabels: true
+#     addServicesLabels: true
+#     addRoutersLabels: true
+#     address: 'http://influxdb:8086'
+#     bucket: traefik
+#     org: myorg
+#     pushInterval: 30s
+#     tokenFile: /run/secrets/traefik_influx_token
+#     additionalLabels:
+#       environment: production
+#       host: '{{env "DOMAINNAME"}}'
 
 tls:
   options:

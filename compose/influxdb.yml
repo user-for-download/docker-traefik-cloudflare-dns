@@ -13,6 +13,7 @@ services:
       - net_db
     secrets:
       - influxdb_password
+      - influxdb_admin_token
     volumes:
       - influxdb_data:/var/lib/influxdb2
     environment:
@@ -22,7 +23,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD_FILE=/run/secrets/influxdb_password
       - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=1406e650f75fbc3b78d8b94f9af06dfd6ceb288e634e7da21d82a9c4ae95a4a9
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE=/run/secrets/influxdb_admin_token
     labels:
       traefik.enable: true
       traefik.http.routers.influx-rtr.entrypoints: https

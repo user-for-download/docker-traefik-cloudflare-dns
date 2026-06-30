@@ -1,7 +1,7 @@
 services:
   whats-up-docker:
     container_name: whats-up-docker
-    image: getwud/wud
+    image: getwud/wud:latest
     security_opt:
       - no-new-privileges:true
     restart: unless-stopped

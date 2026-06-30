@@ -10,14 +10,17 @@ services:
       - all
     networks:
       - net_redis
+    environment:
+      - REDIS_PASSWORD_FILE=/run/secrets/redis_password
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    secrets:
+      - redis_password
+    command: sh -c 'redis-server --appendonly yes --requirepass "$$(cat /run/secrets/redis_password)"'
     healthcheck:
       test:
-        - CMD
-        - redis-cli
-        - ping
+        - CMD-SHELL
+        - redis-cli -a "$$(cat /run/secrets/redis_password)" ping
       interval: 30s
       timeout: 5s
       retries: 3

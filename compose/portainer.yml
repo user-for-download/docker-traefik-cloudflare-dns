@@ -25,8 +25,3 @@ services:
       traefik.http.services.portainer-svc.loadbalancer.server.port: 9000
       # traefik.http.routers.portainer-rtr.middlewares: chain-internal-authelia@file
       traefik.http.routers.portainer-rtr.middlewares: chain-internal@file
-
-networks:
-  socket_proxy_admin:
-    name: socket_proxy_admin
-    external: true

@@ -21,7 +21,7 @@ ntp:
   address: 'udp://time.cloudflare.com:123'
   version: 3
   max_desync: '3s'
-  disable_startup_check: false
+  disable_startup_check: true
   disable_failure: false
 
 log:
@@ -31,7 +31,7 @@ log:
   keep_stdout: false
 
 totp:
-  issuer: auth.<SITE.COM>
+  issuer: auth.localhost.local
   period: 30
   skew: 1
 
@@ -52,16 +52,16 @@ authentication_backend:
 access_control:
   default_policy: deny
   rules:
-    - domain: auth.<SITE.COM>
+    - domain: "auth.localhost.local"
       policy: bypass
-    - domain: "*.<SITE.COM>"
+    - domain: "*.localhost.local"
       policy: one_factor
 
 session:
   cookies:
-    - domain: "<SITE.COM>"
-      authelia_url: "https://auth.<SITE.COM>"
-      default_redirection_url: "https://traefik.<SITE.COM>"
+    - domain: "localhost.local"
+      authelia_url: "https://auth.localhost.local"
+      default_redirection_url: "https://traefik.localhost.local"
       name: "authelia_session"
       same_site: "lax"
       inactivity: "5m"

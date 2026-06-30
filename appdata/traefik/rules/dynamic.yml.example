@@ -1,3 +1,6 @@
+# Example dynamic configuration file
+# Copy this file and rename to dynamic.yml to use it
+
 http:
   serversTransports:
     skipverify:
@@ -10,8 +13,7 @@ http:
         - rate-limit@file
       entryPoints:
         - https
-      tls:
-        certResolver: dns-cloudflare
+      tls: {}
   services:
     app-svc:
       loadBalancer:
@@ -29,8 +31,8 @@ tcp:
       middlewares:
         - tcp-local@file
       tls:
+        # TLS passthrough - Traefik does not terminate TLS
         passthrough: true
-        certResolver: dns-cloudflare
   services:
     app-svc-tcp:
       loadBalancer:
