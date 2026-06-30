@@ -90,6 +90,7 @@ include:
   - compose/vaultwarden.yml
   - compose/dozzle.yml
   - compose/whats-up-docker.yml
+  - compose/navidrome.yml
 
   # AdGuard
   # - compose/traefik-certs-dumper.yml
@@ -105,7 +106,9 @@ volumes:
   authelia_data: {}
   redis_data: {}
   mariadb_data: {}
+  navidrome: {}
   whats-up-docker: {}
   # Uncomment when enabling corresponding services:
   vaultwarden: {}
+  navidrome: {}
   # adguard: {}

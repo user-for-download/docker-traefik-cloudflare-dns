@@ -28,6 +28,7 @@ docker-traefik-cloudflare-dns/
 │   ├── dozzle.yml
 │   ├── influxdb.yml
 │   ├── mariadb.yml
+│   ├── navidrome.yml
 │   ├── portainer.yml
 │   ├── redis.yml
 │   ├── socket-proxy.yml
@@ -40,6 +41,7 @@ docker-traefik-cloudflare-dns/
 │   ├── whats-up-docker.yml
 │   └── whoami.yml
 ├── logs/
+├── music/
 ├── secrets/
 ├── .env.example
 ├── compose.yml
@@ -328,7 +330,7 @@ docker compose --profile apps up -d
 | `database` | mariadb, redis, influxdb |
 | `auth` | authelia |
 | `monitoring` | uptime-kuma, telegraf |
-| `apps` | vaultwarden, dozzle, whats-up-docker |
+| `apps` | vaultwarden, dozzle, whats-up-docker, navidrome |
 | `adguard` | adguard, traefik-certs-dumper |
 | `test` | whoami |
 | `all` | everything |
@@ -355,6 +357,7 @@ docker compose --profile apps up -d
 | **Uptime Kuma** | `status.*` | - | Uptime monitoring |
 | **What's Up Docker** | `wud.*` | - | Update notifications |
 | **Dozzle** | `dozz.*` | - | Container logs |
+| **Navidrome** | `music.*` | - | Music streaming server |
 
 ---
 
