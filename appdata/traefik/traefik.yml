@@ -20,9 +20,7 @@ entryPoints:
 
 api:
   dashboard: true
-  # Insecure mode: dashboard on port 8080 without TLS
-  # Set to false in production and use a router instead
-  insecure: true
+  insecure: false
 
 log:
   filePath: /logs/traefik.json
@@ -46,23 +44,22 @@ accessLog:
       StartUTC: drop
 
 # ============================================
-# Certificate Resolvers (for Let's Encrypt / Cloudflare)
-# Uncomment when switching to Cloudflare DNS challenge
+# Certificate resolver for production HTTPS certificates.
+# Local mode uses the certificate loaded by rules/tls.yml instead.
 # ============================================
-# certificatesResolvers:
-#   dns-cloudflare:
-#     acme:
-#       caServer: 'https://acme-v02.api.letsencrypt.org/directory'
-#       # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
-#       email: '{{env "ACME_EMAIL"}}'
-#       storage: /acme.json
-#       dnsChallenge:
-#         provider: cloudflare
-#         propagation:
-#           delayBeforeChecks: 90s
-#         resolvers:
-#           - '1.1.1.1:53'
-#           - '1.0.0.1:53'
+certificatesResolvers:
+  dns-cloudflare:
+    acme:
+      caServer: 'https://acme-v02.api.letsencrypt.org/directory'
+      email: '{{env "ACME_EMAIL"}}'
+      storage: /acme.json
+      dnsChallenge:
+        provider: cloudflare
+        propagation:
+          delayBeforeChecks: 90s
+        resolvers:
+          - '1.1.1.1:53'
+          - '1.0.0.1:53'
 
 providers:
   docker:

@@ -37,8 +37,7 @@ services:
       traefik.http.routers.vault-admin-rtr.tls: true
       traefik.http.routers.vault-admin-rtr.priority: 100
       traefik.http.routers.vault-admin-rtr.service: vault-svc
-      traefik.http.routers.vault-admin-rtr.middlewares: chain-internal@file
-      # traefik.http.routers.vault-admin-rtr.middlewares: chain-internal-authelia@file
+      traefik.http.routers.vault-admin-rtr.middlewares: chain-internal-authelia@file
     healthcheck:
       test:
         - CMD

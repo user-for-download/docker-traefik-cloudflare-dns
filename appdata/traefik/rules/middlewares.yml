@@ -12,7 +12,7 @@ http:
     authelia:
       forwardAuth:
         address: 'http://authelia:9091/api/authz/forward-auth'
-        trustForwardHeader: true
+        trustForwardHeader: false
         maxResponseBodySize: 1048576
         authResponseHeaders:
           - Remote-User
@@ -58,20 +58,6 @@ http:
           - 104.24.0.0/14
           - 172.64.0.0/13
           - 131.0.72.0/22
-
-    crowdsec:
-      plugin:
-        crowdsec-bouncer-traefik-plugin:
-          enabled: false
-          crowdsecLapiKeyFile: /run/secrets/crowdsec_api_key
-          crowdsecLapiHost: 'http://crowdsec:8080'
-          crowdsecMode: live
-          updateIntervalSeconds: 15
-          clientTrustedIPs:
-            - 127.0.0.1/32
-            - 10.0.0.0/8
-            - 172.16.0.0/12
-            - 192.168.0.0/16
 
     https-redirect:
       redirectScheme:

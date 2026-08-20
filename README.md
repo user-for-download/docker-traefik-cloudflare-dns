@@ -102,7 +102,7 @@ Switch between local testing and Cloudflare DNS challenge by toggling comments i
 
 ### Local Testing (default)
 
-No domain required. Self-signed certs. Dashboard at `http://localhost:8080/dashboard/`.
+No domain required. Self-signed certs. Dashboard at `https://localhost/dashboard/`.
 
 **Generate self-signed cert:**
 ```bash
@@ -112,15 +112,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -addext "subjectAltName=DNS:localhost,DNS:*.localhost,IP:127.0.0.1"
 ```
 
-**Verify these settings in `appdata/traefik/traefik.yml`:**
-```yaml
-entryPoints:
-  https:
-    http:
-      tls:
-        certResolver: local-cert       # <-- active
-        # certResolver: dns-cloudflare  # <-- commented out
-```
+The certificate is loaded directly by `appdata/traefik/rules/tls.yml`; a certificate resolver is not used in local mode.
 
 **Verify these settings in `appdata/traefik/rules/dashboard.yml`:**
 ```yaml
@@ -129,9 +121,7 @@ entryPoints:
       middlewares:
         - chain-internal-basic-auth@file
         # - chain-internal-authelia@file
-      tls:
-        certResolver: local-cert
-        # certResolver: dns-cloudflare
+      tls: {}
 ```
 
 ### Cloudflare DNS Challenge (production)
@@ -149,7 +139,6 @@ entryPoints:
   https:
     http:
       tls:
-        # certResolver: local-cert       # <-- comment out
         certResolver: dns-cloudflare      # <-- activate
         domains:
           - main: '{{env "DOMAINNAME"}}'
@@ -157,11 +146,6 @@ entryPoints:
               - '*.{{env "DOMAINNAME"}}'
 
 certificatesResolvers:
-  # local-cert:                          # <-- comment out
-  #   local:
-  #     cert: /certs/selfsigned.crt
-  #     key: /certs/selfsigned.key
-
   dns-cloudflare:                        # <-- activate
     acme:
       caServer: 'https://acme-v02.api.letsencrypt.org/directory'
@@ -185,22 +169,7 @@ certificatesResolvers:
         certResolver: dns-cloudflare
 ```
 
-**4. Update `appdata/authelia/configuration.yml`** with your domain:
-```yaml
-totp:
-  issuer: auth.yourdomain.com
-access_control:
-  rules:
-    - domain: "auth.yourdomain.com"
-      policy: bypass
-    - domain: "*.yourdomain.com"
-      policy: one_factor
-session:
-  cookies:
-    - domain: "yourdomain.com"
-      authelia_url: "https://auth.yourdomain.com"
-      default_redirection_url: "https://traefik.yourdomain.com"
-```
+**4. Start the stack.** Authelia domain, cookie, and redirect settings are derived from `DOMAINNAME` by Compose.
 
 ---
 
@@ -217,7 +186,6 @@ secrets/
 │   └── storage_mysql_password
 ├── cf
 │   └── cf_dns_api_token          # Only needed for Cloudflare mode
-├── crowdsec_api_key
 ├── db
 │   └── mysql_root_password
 ├── htpasswd
@@ -239,11 +207,11 @@ secrets/
 docker compose --profile core up -d
 ```
 
-Dashboard: `http://localhost:8080/dashboard/`
+Dashboard: `https://localhost/dashboard/` (accept the self-signed certificate)
 
 ### Step 2: Database Services
 
-MariaDB auto-creates the `authelia` database and user.
+MariaDB auto-creates the `authelia` database and user. The `auth`, `monitoring`, and `apps` profiles include their required shared dependencies automatically.
 
 ```bash
 docker compose --profile database up -d
@@ -370,7 +338,6 @@ docker compose --profile apps up -d
 - [ ] Set up Authelia user accounts with strong passwords
 - [ ] Generate proper Vaultwarden admin token
 - [ ] Configure Cloudflare DNS records for all subdomains
-- [ ] Enable CrowdSec bouncer plugin
 - [ ] Set up regular backup for MariaDB and named volumes
 - [ ] Review `socket-proxy-admin` permissions
 

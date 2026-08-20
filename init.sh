@@ -65,14 +65,13 @@ generate_secret "$SECRETDIR/authelia/storage_encryption_key" "Authelia storage e
 generate_secret "$SECRETDIR/authelia/storage_mysql_password" "Authelia MySQL password"
 generate_secret "$SECRETDIR/db/mysql_root_password" "MariaDB root password"
 generate_secret "$SECRETDIR/influxdb_password" "InfluxDB password"
-generate_secret "$SECRETDIR/crowdsec_api_key" "CrowdSec API key"
-generate_secret "$SECRETDIR/wud_auth_hash" "WUD auth hash (placeholder)"
 generate_secret "$SECRETDIR/influxdb_admin_token" "InfluxDB admin token"
 generate_secret "$SECRETDIR/redis_password" "Redis password"
 
-# Create placeholder files for tokens that must be set manually
+# Create placeholder files for values that must be set manually
 for f in "$SECRETDIR/cf/cf_dns_api_token" \
          "$SECRETDIR/vl/vaultwarden_admin_token" \
+         "$SECRETDIR/wud_auth_hash" \
          "$SECRETDIR/telegraf/influx_token" \
          "$SECRETDIR/traefik/influx_token" \
          "$SECRETDIR/htpasswd"; do

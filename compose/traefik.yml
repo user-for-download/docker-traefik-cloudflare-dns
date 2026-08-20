@@ -11,21 +11,20 @@ services:
     networks:
       net_t2: null
       socket_proxy: null
+    depends_on:
+      socket-proxy:
+        condition: service_healthy
     ports:
       - '80:80'
       - '443:443'
-      - '8080:8080'
     environment:
       - TZ=${TZ}
       - DOMAINNAME=${DOMAINNAME}
-      # CLOUDFLARE: uncomment for DNS challenge
-      # - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
-      # - ACME_EMAIL=${ACME_EMAIL}
+      - ACME_EMAIL=${ACME_EMAIL}
+      - CF_DNS_API_TOKEN_FILE=/run/secrets/cf_dns_api_token
     secrets:
       - htpasswd
-      - crowdsec_api_key
-      # CLOUDFLARE: uncomment for DNS challenge
-      # - cf_dns_api_token
+      - cf_dns_api_token
       - traefik_influx_token
     volumes:
       - ${APPDIR}/traefik/traefik.yml:/traefik.yml:ro

@@ -11,6 +11,9 @@ services:
     networks:
       - net_t2
       - socket_proxy
+    depends_on:
+      socket-proxy:
+        condition: service_healthy
     environment:
       DOZZLE_LEVEL: info
       DOZZLE_TAILSIZE: 300

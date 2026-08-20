@@ -11,6 +11,11 @@ services:
     networks:
       - net_db
       - socket_proxy
+    depends_on:
+      influxdb:
+        condition: service_healthy
+      socket-proxy:
+        condition: service_healthy
     environment:
       - TZ=${TZ}
       - INFLUX_HOST=http://influxdb:8086

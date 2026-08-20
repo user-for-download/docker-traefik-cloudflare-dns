@@ -23,5 +23,4 @@ services:
       traefik.http.routers.portainer-rtr.service: portainer-svc
       traefik.http.routers.portainer-rtr.tls: true
       traefik.http.services.portainer-svc.loadbalancer.server.port: 9000
-      # traefik.http.routers.portainer-rtr.middlewares: chain-internal-authelia@file
-      traefik.http.routers.portainer-rtr.middlewares: chain-internal@file
+      traefik.http.routers.portainer-rtr.middlewares: chain-internal-authelia@file

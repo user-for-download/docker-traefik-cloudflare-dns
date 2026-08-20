@@ -22,10 +22,8 @@ secrets:
   htpasswd:
     file: ${DOCKERDIR}/secrets/htpasswd
   # CLOUDFLARE: uncomment for DNS challenge
-  # cf_dns_api_token:
-  #   file: ${DOCKERDIR}/secrets/cf/cf_dns_api_token
-  crowdsec_api_key:
-    file: ${DOCKERDIR}/secrets/crowdsec_api_key
+  cf_dns_api_token:
+    file: ${DOCKERDIR}/secrets/cf/cf_dns_api_token
 
   # Authelia
   authelia_jwt_secret:
@@ -93,11 +91,11 @@ include:
   - compose/navidrome.yml
 
   # AdGuard
-  # - compose/traefik-certs-dumper.yml
-  # - compose/adguard.yml
+  - compose/traefik-certs-dumper.yml
+  - compose/adguard.yml
 
   # Test
-  # - compose/whoami.yml
+  - compose/whoami.yml
 
 volumes:
   portainer_data: {}
@@ -110,5 +108,4 @@ volumes:
   whats-up-docker: {}
   # Uncomment when enabling corresponding services:
   vaultwarden: {}
-  navidrome: {}
-  # adguard: {}
+  adguard: {}

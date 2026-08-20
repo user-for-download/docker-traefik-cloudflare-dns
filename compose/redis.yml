@@ -7,6 +7,7 @@ services:
     restart: always
     profiles:
       - database
+      - auth
       - all
     networks:
       - net_redis

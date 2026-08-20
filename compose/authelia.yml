@@ -13,6 +13,11 @@ services:
       - net_t2
       - net_db
       - net_redis
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - authelia_data:/data
       - ${APPDIR}/authelia/configuration.yml:/config/configuration.yml:ro
@@ -27,6 +32,12 @@ services:
       - AUTHELIA_STORAGE_MYSQL_PASSWORD_FILE=/run/secrets/authelia_storage_mysql_password
       - AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE=/run/secrets/authelia_storage_encryption_key
       - AUTHELIA_SESSION_REDIS_PASSWORD_FILE=/run/secrets/redis_password
+      - AUTHELIA_TOTP_ISSUER=auth.${DOMAINNAME}
+      - AUTHELIA_ACCESS_CONTROL_RULES_0_DOMAIN=auth.${DOMAINNAME}
+      - AUTHELIA_ACCESS_CONTROL_RULES_1_DOMAIN=*.${DOMAINNAME}
+      - AUTHELIA_SESSION_COOKIES_0_DOMAIN=${DOMAINNAME}
+      - AUTHELIA_SESSION_COOKIES_0_AUTHELIA_URL=https://auth.${DOMAINNAME}
+      - AUTHELIA_SESSION_COOKIES_0_DEFAULT_REDIRECTION_URL=https://traefik.${DOMAINNAME}
     secrets:
       - authelia_jwt_secret
       - authelia_session_secret
@@ -40,7 +51,7 @@ services:
       traefik.http.routers.authelia-rtr.tls: true
       traefik.http.routers.authelia-rtr.service: authelia-svc
       traefik.http.services.authelia-svc.loadbalancer.server.port: 9091
-      traefik.http.routers.authelia-rtr.middlewares: chain-authelia@file
+      traefik.http.routers.authelia-rtr.middlewares: chain-public@file
     healthcheck:
       test:
         - CMD

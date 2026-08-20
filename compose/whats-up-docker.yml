@@ -11,6 +11,9 @@ services:
     networks:
       - net_t2
       - socket_proxy
+    depends_on:
+      socket-proxy:
+        condition: service_healthy
     secrets:
       - wud_auth_hash
     volumes:
